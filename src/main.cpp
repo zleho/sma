@@ -51,6 +51,27 @@ static void pulseStreamStateCb(pa_stream*, void*);
 static void pulseStreamOverflowCb(pa_stream*, void*);
 static void pulseStreamReadCb(pa_stream*, size_t, void*);
 
+
+static inline long long log2_floor(long long x)
+{
+    return 64 - 1 - 16 - __builtin_clzl(x);
+}
+
+/*
+    x = 2^log2_floor(x)+y 
+      = 2^log2_floor(x) * ((2^log2_floor(x)+y) / 2^log2_floor(x))
+      = 2^log2_floor(x) * (x / 2^log2_floor(x))
+
+    log2(x) = log2_floor(x) + log2(x / 2^log2_floor(x))
+
+    1 <= x / 2^log2_floor(x) <= 2 -> 0 <= log2(x / 2^log2_floor(x)) <= 1
+*/
+
+static inline long long log2_fix(long long x)
+{
+    return log2_floor(x) << 16;
+}
+
 /*
    20*log10(RMS/(2^(-16))
     = 20*16*log10(2) + 20*log10(RMS)
@@ -60,7 +81,6 @@ static void pulseStreamReadCb(pa_stream*, size_t, void*);
     = C1 + C2 + C3 * log2(SUM), where C3 = 10/log2(10)
 
 */
-
 class RMSdB {
 public:
     explicit RMSdB(size_t n) 
@@ -86,7 +106,7 @@ public:
         sum_ += x;
 
         if (++curr_ == size_) {
-            sum_ = 64 - 1 - 16 - __builtin_clzl(sum_);
+            sum_ = log2_fix(sum_) << 16;
             sum_ *= c3;
             sum_ += c1 + c2;
             ret = sum_ >> 16;
@@ -398,7 +418,7 @@ void AppWindow::measure(int x)
     int val;
     if (rmsMeter_.step(x, val)) {
         rmsValue_.set_text(std::to_string(val) + " dB");
-        rmsBar_.set_fraction(val / 90.0);
+        rmsBar_.set_fraction(val / 96.0);
     }
     
 }
