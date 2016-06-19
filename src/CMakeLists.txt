@@ -1,4 +1,5 @@
 find_package(PkgConfig)
+set (CMAKE_CXX_STANDARD 14)
 
 pkg_search_module(PULSE REQUIRED libpulse-mainloop-glib)
 pkg_search_module(GTKMM REQUIRED gtkmm-3.0)

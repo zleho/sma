@@ -17,6 +17,8 @@
 
 #include <cassert>
 
+#include "fixed.h"
+
 enum class AppState : unsigned {
     conn,
     devices,
@@ -52,26 +54,6 @@ static void pulseStreamOverflowCb(pa_stream*, void*);
 static void pulseStreamReadCb(pa_stream*, size_t, void*);
 
 
-static inline long long log2_floor(long long x)
-{
-    return 64 - 1 - 16 - __builtin_clzl(x);
-}
-
-/*
-    x = 2^log2_floor(x)+y 
-      = 2^log2_floor(x) * ((2^log2_floor(x)+y) / 2^log2_floor(x))
-      = 2^log2_floor(x) * (x / 2^log2_floor(x))
-
-    log2(x) = log2_floor(x) + log2(x / 2^log2_floor(x))
-
-    1 <= x / 2^log2_floor(x) <= 2 -> 0 <= log2(x / 2^log2_floor(x)) <= 1
-*/
-
-static inline long long log2_fix(long long x)
-{
-    return log2_floor(x) << 16;
-}
-
 /*
    20*log10(RMS/(2^(-16))
     = 20*16*log10(2) + 20*log10(RMS)
@@ -81,35 +63,37 @@ static inline long long log2_fix(long long x)
     = C1 + C2 + C3 * log2(SUM), where C3 = 10/log2(10)
 
 */
+
+using fixie::fix16ll;
+
 class RMSdB {
 public:
     explicit RMSdB(size_t n) 
         : size_(n),
-          c1(6313056),
-          c2(-10 * std::log10(size_)*65536),
-          c3(197283)
+          c1(20*16*std::log10(2)),
+          c2(-10*std::log10(size_)),
+          c3(10/std::log2(10))
     {
         init();
     }
 
     void init()
     {
-        sum_ = 0;
+        sum_ = fix16ll();
         curr_ = 0;
     }
 
-    bool step(long long x, int& ret)
+    bool step(long long input, int& ret)
     {
-        x <<= 1;
+        auto x = fix16ll(input, false) << 1;
         x *= x;
-        x >>= 16;
         sum_ += x;
 
         if (++curr_ == size_) {
-            sum_ = log2_fix(sum_) << 16;
+            sum_ = fixie::log2(sum_);
             sum_ *= c3;
             sum_ += c1 + c2;
-            ret = sum_ >> 16;
+            ret = static_cast<int>(sum_);
             init();
             return true;
         }
@@ -118,8 +102,8 @@ public:
 private:
     size_t curr_;
     size_t size_;
-    long long sum_;
-    long long c1, c2, c3;
+    fix16ll sum_;
+    fix16ll c1, c2, c3;
 };
 
 class AppWindow : public Gtk::Window {
@@ -425,6 +409,8 @@ void AppWindow::measure(int x)
 
 int main(int argc, char* argv[])
 {
+    fixie::test::fixed_test();
+
     auto app = Gtk::Application::create(argc, argv, "org.sma.SoundMeasurementApplication");
     
     AppWindow appWindow;
