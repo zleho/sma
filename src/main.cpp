@@ -90,10 +90,13 @@ public:
         sum_ += x;
 
         if (++curr_ == size_) {
-            sum_ = fixie::log2(sum_);
-            sum_ *= c3;
-            sum_ += c1 + c2;
-            ret = static_cast<int>(sum_);
+            ret = 0;
+            if (sum_.repr) {
+                sum_ = fixie::log2(sum_);
+                sum_ *= c3;
+                sum_ += c1 + c2;
+                ret = static_cast<int>(sum_);
+            }
             init();
             return true;
         }
@@ -271,6 +274,7 @@ void AppWindow::setState(AppState state)
     {
         config_.set_sensitive(true);
         measButton_.set_sensitive(true);
+        rmsBar_.set_fraction(0);
         break;
     }
     case AppState::connstream:

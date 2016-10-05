@@ -235,7 +235,7 @@ namespace fixie {
     using fix16i = fixed<int32, 16>;
     using fix16ll = fixed<int64, 16>;
     using fix32ll = fixed<int64, 32>;
-
+    using fix15ll = fixed<int64, 15>;
     namespace test {
         inline void fixed_test() {
             auto x = fix16ll(1, false);
