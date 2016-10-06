@@ -83,9 +83,8 @@ public:
         curr_ = 0;
     }
 
-    bool step(long long input, int& ret)
+    bool step(fix16ll x, int& ret)
     {
-        auto x = fix16ll(input, false) << 1;
         x *= x;
         sum_ += x;
 
@@ -107,6 +106,70 @@ private:
     size_t size_;
     fix16ll sum_;
     fix16ll c1, c2, c3;
+};
+
+// direct form 1, it is better for fixed point numbers
+class BiQuad {
+public:
+    BiQuad(fix16ll a1, fix16ll a2, fix16ll b0, fix16ll b1, fix16ll b2)
+        : a1_(a1), a2_(a2), b0_(b0), b1_(b1), b2_(b2)
+    {
+        init();
+    }
+
+    void init()
+    {
+        x1_ = x2_ = fix16ll();
+        y1_ = y2_ = fix16ll();
+    }
+
+    fix16ll operator()(fix16ll x)
+    {
+        fix16ll y = b0_*x + b1_*x1_ + b2_*x2_ +
+                    a1_*y1_ + a2_*y2_;
+        x2_ = x1_;
+        x1_ = x;
+        y2_ = y1_;
+        y1_ = y;
+        
+        return y;
+    }
+private:
+    fix16ll a1_, a2_;
+    fix16ll b0_, b1_, b2_;
+    fix16ll x1_, x2_;
+    fix16ll y1_, y2_;
+};
+
+class ITUBS1770 {
+public:
+    ITUBS1770(std::size_t size)
+        : rms_(size),
+          stage1_(fix16ll(-1.69065929318241), fix16ll(0.73248077421585), fix16ll(1.53512485958697), fix16ll(-2.69169618940638), fix16ll(1.19839281085285)),
+          stage2_(fix16ll(-1.99004745483398), fix16ll(0.99007225036621), fix16ll(1), fix16ll(-2), fix16ll(1))
+    {
+        init();
+    }
+
+    void init()
+    {
+        stage1_.init();
+        stage2_.init();
+    }
+
+    bool step(fix16ll x, int& ret)
+    {
+        if (rms_.step(stage2_(stage1_(x)), ret)) {
+            init();
+            return true;
+        }
+
+        return false;
+    }
+private:
+    BiQuad stage1_;
+    BiQuad stage2_;
+    RMSdB rms_;
 };
 
 class AppWindow : public Gtk::Window {
@@ -401,8 +464,9 @@ static void pulseStreamReadCb(pa_stream* stream, size_t nbytes, void* userdata)
     }
 }
 
-void AppWindow::measure(int x)
+void AppWindow::measure(int input)
 {
+    fix16ll x(input << 1, false);
     int val;
     if (rmsMeter_.step(x, val)) {
         rmsValue_.set_text(std::to_string(val) + " dB");
