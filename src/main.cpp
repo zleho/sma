@@ -11,6 +11,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/scale.h>
 
 #include <pulse/pulseaudio.h>
 #include <pulse/glib-mainloop.h>
@@ -55,8 +56,8 @@ static void pulseStreamReadCb(pa_stream*, size_t, void*);
 
 
 /*
-   20*log10(RMS/(2^(-16))
-    = 20*16*log10(2) + 20*log10(RMS)
+   20*log10(RMS/(2^(-Q))
+    = 20*Q*log10(2) + 20*log10(RMS)
     = C1 + 10*log10(SUM/N), where C1 = 20*16*log10(2)
     = C1 + -10*log10(N) + 10*log10(SUM)
     = C1 + C2 + (10/log2(10))*log2(SUM), where C2 = -10*log10(N)
@@ -68,6 +69,7 @@ using fixie::fix16ll;
 
 class RMSdB {
 public:
+    RMSdB() {}
     explicit RMSdB(size_t n) 
         : size_(n),
           c1(20*16*std::log10(2)),
@@ -111,6 +113,7 @@ private:
 // direct form 1, it is better for fixed point numbers
 class BiQuad {
 public:
+    BiQuad() {}
     BiQuad(fix16ll a1, fix16ll a2, fix16ll b0, fix16ll b1, fix16ll b2)
         : a1_(a1), a2_(a2), b0_(b0), b1_(b1), b2_(b2)
     {
@@ -143,6 +146,7 @@ private:
 
 class ITUBS1770 {
 public:
+    ITUBS1770() {}
     ITUBS1770(std::size_t size)
         : rms_(size),
           stage1_(fix16ll(-1.69065929318241), fix16ll(0.73248077421585), fix16ll(1.53512485958697), fix16ll(-2.69169618940638), fix16ll(1.19839281085285)),
@@ -172,13 +176,56 @@ private:
     RMSdB rms_;
 };
 
+class Config : public Gtk::Frame {
+public:
+    Config();
+    ~Config() override;
+    void addSource(const char*);
+    void clearDevices();
+    std::string getActiveDevice();
+private:
+    bool firstDevice_;
+    Gtk::Label deviceLabel_;
+    Gtk::ComboBoxText device_;
+};
+
+Config::Config()
+    : firstDevice_(false)
+{
+    set_label("Parameters");
+    add(device_);
+ }
+
+Config::~Config()
+{
+}
+
+void Config::addSource(const char* str)
+{
+    device_.append(str);
+    if (firstDevice_) {
+        device_.set_active_text(str);
+        firstDevice_ = false;
+    }
+}
+
+void Config::clearDevices()
+{
+    device_.remove_all();
+    firstDevice_ = true;
+}
+
+std::string Config::getActiveDevice()
+{
+    return device_.get_active_text().c_str();
+}
+
 class AppWindow : public Gtk::Window {
 public:
     AppWindow();
-    ~AppWindow();
+    ~AppWindow() override;
 
     void setState(AppState);
-    void addSource(const char*);
     void setStatusBar(const std::string& status)
     {
         statusBar_.remove_all_messages();
@@ -192,6 +239,8 @@ public:
     }
 
     void measure(int);
+
+    Config& getConfig() { return config_; }
 private:
     void onMeasButton()
     {
@@ -202,7 +251,6 @@ private:
     }
 
     AppState state_;
-    bool firstDevice_;
     size_t overflowNum_;
     RMSdB rmsMeter_;
 
@@ -212,9 +260,7 @@ private:
     pa_stream* pulseStream_;
     pa_sample_spec pulseSample_;
 
-    Gtk::Frame config_;
-    Gtk::Label deviceLabel_;
-    Gtk::ComboBoxText device_;
+    Config config_;
     Gtk::ToggleButton measButton_;
     Gtk::Frame measurements_;
     Gtk::Label rmsName_;
@@ -244,12 +290,8 @@ AppWindow::AppWindow() : overflowNum_(0), rmsMeter_(19200)
     pulseSample_.channels = 1;
     pulseStream_ = nullptr;
 
-
     set_title("Sound Measurement Application 0.1");
     set_default_size(300, -1);
-    
-    config_.set_label("Parameters");
-    config_.add(device_);
     
     measButton_.set_label("MEASURE");
     measButton_.signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::onMeasButton));
@@ -304,15 +346,6 @@ AppWindow::~AppWindow()
     pa_glib_mainloop_free(pulseLoop_);
 }
 
-void AppWindow::addSource(const char* str)
-{
-    device_.append(str);
-    if (firstDevice_) {
-        device_.set_active_text(str);
-        firstDevice_ = false;
-    }
-}
-
 void AppWindow::setState(AppState state)
 {
     switch (state) {
@@ -327,8 +360,7 @@ void AppWindow::setState(AppState state)
         break;
     case AppState::devices:
     {
-        device_.remove_all();
-        firstDevice_ = true;
+        config_.clearDevices();
         auto op = pa_context_get_source_info_list(pulseCtx_, pulseDevicesCb, this);
         pa_operation_unref(op);
         break;
@@ -348,7 +380,7 @@ void AppWindow::setState(AppState state)
         pa_stream_set_state_callback(pulseStream_, pulseStreamStateCb, this);
         pa_stream_set_overflow_callback(pulseStream_, pulseStreamOverflowCb, this);
         pa_stream_set_read_callback(pulseStream_, pulseStreamReadCb, this);
-        pa_stream_connect_record(pulseStream_, device_.get_active_text().c_str(), nullptr, PA_STREAM_NOFLAGS);
+        pa_stream_connect_record(pulseStream_, config_.getActiveDevice().c_str(), nullptr, PA_STREAM_NOFLAGS);
         break;
     }
     case AppState::meas:
@@ -404,6 +436,7 @@ static void pulseDevicesCb(pa_context*, const pa_source_info* src, int eol, void
     auto appWindow = static_cast<AppWindow*>(userdata);
     
     if (eol < 0) {
+        abort();
         // TODO: error reporting
         appWindow->setState(AppState::term);
         return;
@@ -414,7 +447,7 @@ static void pulseDevicesCb(pa_context*, const pa_source_info* src, int eol, void
         return;
     }
 
-    appWindow->addSource(src->name);
+    appWindow->getConfig().addSource(src->name);
 }
 
 static void pulseStreamStateCb(pa_stream* stream, void* userdata)
@@ -428,6 +461,7 @@ static void pulseStreamStateCb(pa_stream* stream, void* userdata)
         appWindow->setState(AppState::meas);
         break;
     case PA_STREAM_FAILED:
+        abort();
         // TODO: error reporting
         appWindow->setState(AppState::term);
         break;
