@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 
 #include <gtkmm/window.h>
 #include <gtkmm/statusbar.h>
@@ -68,11 +69,18 @@ static void pulseStreamReadCb(pa_stream*, size_t, void*);
 template <class Fixed>
 class RMSdB {
 public:
+    static double max() 
+    {
+        return 20*FixedType::power()*std::log10(2);
+    }
+
     using FixedType = Fixed;
+
     RMSdB() {}
+
     explicit RMSdB(size_t n) 
         : size_(n),
-          c1(20*FixedType::power()*std::log10(2)),
+          c1(max()),
           c2(-10*std::log10(size_)),
           c3(10/std::log2(10))
     {
@@ -85,18 +93,18 @@ public:
         curr_ = 0;
     }
 
-    bool step(Fixed x, int& ret)
+    bool step(Fixed x, double& ret)
     {
         x *= x;
         sum_ += x;
 
         if (++curr_ == size_) {
-            ret = 0;
+            ret = 0.0;
             if (sum_.repr) {
                 sum_ = fixie::log2(sum_);
                 sum_ *= c3;
                 sum_ += c1 + c2;
-                ret = static_cast<int>(sum_);
+                ret = static_cast<double>(sum_);
             }
             init();
             return true;
@@ -154,6 +162,56 @@ std::string Config::getActiveDevice()
     return device_.get_active_text().c_str();
 }
 
+static inline std::string toString(double v)
+{
+    std::stringstream ss;
+    ss << std::setprecision(2) << v;
+    return ss.str();
+}
+
+template <class MeasType>
+class Measurement : public Gtk::Frame {
+public:
+    Measurement(const std::string& label)
+    {
+        set_label(label);
+        label_.set_halign(Gtk::Align::ALIGN_END);
+        box_.add(label_);
+        box_.add(bar_);
+        box_.set_margin_start(10);
+        box_.set_margin_end(10);
+        add(box_);
+        setValue(0.0);
+    }
+
+    ~Measurement() override
+    {
+    }
+
+    void init(size_t size)
+    {
+        meas_ = MeasType(size);
+    }
+
+    void measure(typename MeasType::FixedType x)
+    {
+        double value;
+        if (meas_.step(x, value))
+            setValue(value);
+    }
+
+    void setValue(double val)
+    {
+        bar_.set_fraction(val / MeasType::max());
+        label_.set_text(toString(val));
+    }
+private:
+    MeasType meas_;
+    Gtk::VBox box_;
+    Gtk::Label label_;
+    Gtk::ProgressBar bar_;
+};
+
 using fix16ll = fixie::Fixed<long long, 16>;
 
 class AppWindow : public Gtk::Window {
@@ -188,7 +246,6 @@ private:
 
     AppState state_;
     size_t overflowNum_;
-    RMSdB<fix16ll> rmsMeter_;
 
     pa_glib_mainloop* pulseLoop_;
     pa_mainloop_api* pulseApi_;
@@ -198,18 +255,12 @@ private:
 
     Config config_;
     Gtk::ToggleButton measButton_;
-    Gtk::Frame measurements_;
-    Gtk::Label rmsName_;
-    Gtk::Label rmsValue_;
-    Gtk::ProgressBar rmsBar_;
+    Measurement<RMSdB<fix16ll>> rms_;
     Gtk::Statusbar statusBar_;
-    Gtk::VBox rmsBox_;
-    Gtk::HBox rmsLiterals_;
-
     Gtk::VBox box_;
 };
 
-AppWindow::AppWindow() : overflowNum_(0), rmsMeter_(19200)
+AppWindow::AppWindow() : overflowNum_(0), rms_("RMS (dB)")
 {
     pulseLoop_ = pa_glib_mainloop_new(nullptr);
     pulseApi_ = pa_glib_mainloop_get_api(pulseLoop_);
@@ -232,20 +283,9 @@ AppWindow::AppWindow() : overflowNum_(0), rmsMeter_(19200)
     measButton_.set_label("MEASURE");
     measButton_.signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::onMeasButton));
 
-    measurements_.set_label("Measurements");
-    rmsName_.set_text("RMS");
-    rmsName_.set_halign(Gtk::ALIGN_START);
-    rmsValue_.set_text("0 dB");
-    rmsValue_.set_halign(Gtk::ALIGN_END);
-    rmsLiterals_.add(rmsName_);
-    rmsLiterals_.add(rmsValue_);
-    rmsBox_.add(rmsLiterals_);
-    rmsBox_.add(rmsBar_);
-    measurements_.add(rmsBox_);
-
     box_.add(config_);
     box_.add(measButton_);
-    box_.add(measurements_);
+    box_.add(rms_);
     box_.add(statusBar_);
     add(box_);
     show_all_children();
@@ -291,7 +331,7 @@ void AppWindow::setState(AppState state)
     case AppState::conn:
         config_.set_sensitive(false);
         measButton_.set_sensitive(false);
-        measurements_.set_sensitive(false);
+        rms_.set_sensitive(false);
         pa_context_connect(pulseCtx_, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
         break;
     case AppState::devices:
@@ -305,7 +345,8 @@ void AppWindow::setState(AppState state)
     {
         config_.set_sensitive(true);
         measButton_.set_sensitive(true);
-        rmsBar_.set_fraction(0);
+        rms_.set_sensitive(false);
+        rms_.setValue(0.0);
         break;
     }
     case AppState::connstream:
@@ -322,13 +363,14 @@ void AppWindow::setState(AppState state)
     case AppState::meas:
     {
         overflowNum_ = 0;
-        measurements_.set_sensitive(true);
+        rms_.init(19200);
+        rms_.set_sensitive(true);
         measButton_.set_sensitive(true);
         break;
     }
     case AppState::disconnstream:
     {
-        measurements_.set_sensitive(false);
+        rms_.set_sensitive(false);
         config_.set_sensitive(false);
         measButton_.set_sensitive(false);
         pa_stream_disconnect(pulseStream_);
@@ -425,9 +467,10 @@ static void pulseStreamReadCb(pa_stream* stream, size_t nbytes, void* userdata)
             auto buffer = static_cast<const short*>(data); 
             while (nbytes--)
                 appWindow->measure(*buffer++);
-        }    
-        
-        if (nbytes)
+            
+            pa_stream_drop(stream);
+        }
+        else if (nbytes)
             pa_stream_drop(stream);
         
         pa_stream_peek(stream, &data, &nbytes);
@@ -437,12 +480,7 @@ static void pulseStreamReadCb(pa_stream* stream, size_t nbytes, void* userdata)
 void AppWindow::measure(int input)
 {
     fix16ll x(input << 1, false);
-    int val;
-    if (rmsMeter_.step(x, val)) {
-        rmsValue_.set_text(std::to_string(val) + " dB");
-        rmsBar_.set_fraction(val / 96.0);
-    }
-    
+    rms_.measure(x);
 }
 
 int main(int argc, char* argv[])

@@ -96,10 +96,10 @@ namespace fixie {
             return repr == other.repr;
         }
 
-        template <typename Int2, typename = std::enable_if_t<std::is_integral<Int2>::value>>
-        operator Int2() const
+        template <typename Floating, typename = std::enable_if_t<std::is_floating_point<Floating>::value>>
+        operator Floating() const
         {
-            return repr >> Q;
+            return static_cast<Floating>(repr) / denom();
         }
     };
     
