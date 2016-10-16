@@ -1,4 +1,3 @@
-* display measurement size config
 * display ITU measurement
 * create low/high-pass filter creation process the bands
 * get the weigths for the bands

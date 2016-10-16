@@ -125,17 +125,33 @@ public:
     void addSource(const char*);
     void clearDevices();
     std::string getActiveDevice();
+    size_t getSampleSize() { return 48000 * measSize_.get_value(); }
 private:
     bool firstDevice_;
     Gtk::Label deviceLabel_;
     Gtk::ComboBoxText device_;
+    Gtk::Scale measSize_;
+    Gtk::Frame deviceFrame_;
+    Gtk::Frame measSizeFrame_;
+    Gtk::VBox box_;
 };
 
 Config::Config()
     : firstDevice_(false)
 {
     set_label("Parameters");
-    add(device_);
+    
+    deviceFrame_.set_label("Input device");
+    deviceFrame_.add(device_);
+    box_.add(deviceFrame_);
+    
+    measSize_.set_range(0.1, 1.0);
+    measSize_.set_increments(0.1, 0.1);
+    measSizeFrame_.set_label("Measurement size (s)");
+    measSizeFrame_.add(measSize_);
+    box_.add(measSizeFrame_);
+    
+    add(box_);
  }
 
 Config::~Config()
@@ -363,7 +379,7 @@ void AppWindow::setState(AppState state)
     case AppState::meas:
     {
         overflowNum_ = 0;
-        rms_.init(19200);
+        rms_.init(config_.getSampleSize());
         rms_.set_sensitive(true);
         measButton_.set_sensitive(true);
         break;
