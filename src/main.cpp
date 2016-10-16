@@ -18,7 +18,7 @@
 
 #include <cassert>
 
-#include "fixed.h"
+#include "fixie.h"
 
 enum class AppState : unsigned {
     conn,
@@ -65,14 +65,14 @@ static void pulseStreamReadCb(pa_stream*, size_t, void*);
 
 */
 
-using fixie::fix16ll;
-
+template <class Fixed>
 class RMSdB {
 public:
+    using FixedType = Fixed;
     RMSdB() {}
     explicit RMSdB(size_t n) 
         : size_(n),
-          c1(20*16*std::log10(2)),
+          c1(20*FixedType::power()*std::log10(2)),
           c2(-10*std::log10(size_)),
           c3(10/std::log2(10))
     {
@@ -81,11 +81,11 @@ public:
 
     void init()
     {
-        sum_ = fix16ll();
+        sum_ = Fixed();
         curr_ = 0;
     }
 
-    bool step(fix16ll x, int& ret)
+    bool step(Fixed x, int& ret)
     {
         x *= x;
         sum_ += x;
@@ -106,74 +106,8 @@ public:
 private:
     size_t curr_;
     size_t size_;
-    fix16ll sum_;
-    fix16ll c1, c2, c3;
-};
-
-// direct form 1, it is better for fixed point numbers
-class BiQuad {
-public:
-    BiQuad() {}
-    BiQuad(fix16ll a1, fix16ll a2, fix16ll b0, fix16ll b1, fix16ll b2)
-        : a1_(a1), a2_(a2), b0_(b0), b1_(b1), b2_(b2)
-    {
-        init();
-    }
-
-    void init()
-    {
-        x1_ = x2_ = fix16ll();
-        y1_ = y2_ = fix16ll();
-    }
-
-    fix16ll operator()(fix16ll x)
-    {
-        fix16ll y = b0_*x + b1_*x1_ + b2_*x2_ +
-                    a1_*y1_ + a2_*y2_;
-        x2_ = x1_;
-        x1_ = x;
-        y2_ = y1_;
-        y1_ = y;
-        
-        return y;
-    }
-private:
-    fix16ll a1_, a2_;
-    fix16ll b0_, b1_, b2_;
-    fix16ll x1_, x2_;
-    fix16ll y1_, y2_;
-};
-
-class ITUBS1770 {
-public:
-    ITUBS1770() {}
-    ITUBS1770(std::size_t size)
-        : rms_(size),
-          stage1_(fix16ll(-1.69065929318241), fix16ll(0.73248077421585), fix16ll(1.53512485958697), fix16ll(-2.69169618940638), fix16ll(1.19839281085285)),
-          stage2_(fix16ll(-1.99004745483398), fix16ll(0.99007225036621), fix16ll(1), fix16ll(-2), fix16ll(1))
-    {
-        init();
-    }
-
-    void init()
-    {
-        stage1_.init();
-        stage2_.init();
-    }
-
-    bool step(fix16ll x, int& ret)
-    {
-        if (rms_.step(stage2_(stage1_(x)), ret)) {
-            init();
-            return true;
-        }
-
-        return false;
-    }
-private:
-    BiQuad stage1_;
-    BiQuad stage2_;
-    RMSdB rms_;
+    Fixed sum_;
+    Fixed c1, c2, c3;
 };
 
 class Config : public Gtk::Frame {
@@ -220,6 +154,8 @@ std::string Config::getActiveDevice()
     return device_.get_active_text().c_str();
 }
 
+using fix16ll = fixie::Fixed<long long, 16>;
+
 class AppWindow : public Gtk::Window {
 public:
     AppWindow();
@@ -252,7 +188,7 @@ private:
 
     AppState state_;
     size_t overflowNum_;
-    RMSdB rmsMeter_;
+    RMSdB<fix16ll> rmsMeter_;
 
     pa_glib_mainloop* pulseLoop_;
     pa_mainloop_api* pulseApi_;
@@ -511,8 +447,6 @@ void AppWindow::measure(int input)
 
 int main(int argc, char* argv[])
 {
-    fixie::test::fixed_test();
-
     auto app = Gtk::Application::create(argc, argv, "org.sma.SoundMeasurementApplication");
     
     AppWindow appWindow;
