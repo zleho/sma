@@ -69,7 +69,7 @@ static void pulseStreamReadCb(pa_stream*, size_t, void*);
 template <class Fixed>
 class RMSdB {
 public:
-    static double max() 
+    static constexpr double max() 
     {
         return 20*FixedType::power()*std::log10(2);
     }
@@ -116,6 +116,90 @@ private:
     size_t size_;
     Fixed sum_;
     Fixed c1, c2, c3;
+};
+
+template <class Fixed>
+class BiQuad {
+public:
+    BiQuad()
+    {
+    }
+
+    BiQuad(Fixed b0, Fixed b1, Fixed b2, Fixed a1, Fixed a2)
+        : b0_(b0), b1_(b1), b2_(b2), a1_(a1), a2_(a2_)
+    {
+        init();
+    }
+
+    void init()
+    {
+        x1_ = x2_ = y1_ = y2_ = Fixed();
+    }
+
+    Fixed operator()(Fixed x)
+    {
+        auto y 
+            = b0_*x + b1_*x1_ + b2_*x2_ 
+            - a1_*y1_ - a2_*y2_;
+
+        y2_ = y1_; y1_ = y;
+        x2_ = x1_; x1_ = x;
+
+        return y;
+    }
+private:
+    Fixed b0_, b1_, b2_;
+    Fixed a1_, a2_;
+    Fixed x1_, x2_;
+    Fixed y1_, y2_;
+};
+
+template <class Fixed>
+class ITUBS1770 {
+public:
+    using FixedType = Fixed;
+    static constexpr double max()
+    {
+        return RMSdB<Fixed>::max();
+    }
+
+    ITUBS1770()
+    {
+    }
+
+    explicit ITUBS1770(std::size_t size)
+        : stage1_(
+            Fixed(1.53512485958697),
+            Fixed(-2.69169618940638),
+            Fixed(1.19839281085285),
+            Fixed(-1.69065929318241),
+            Fixed(0.73248077421585)
+          ),
+          stage2_(
+            Fixed(1),
+            Fixed(-2),
+            Fixed(1),
+            Fixed(-1.99004745483398),
+            Fixed(0.99007225036621)
+          ),
+          rms_(size)
+    {
+    }
+
+    bool step(Fixed x, double& val)
+    {
+        if (rms_.step(stage2_(stage1_(x)), val)) {
+            stage1_.init();
+            stage2_.init();
+            return true;
+        }
+
+        return false;
+    }
+private:
+    BiQuad<Fixed> stage1_;
+    BiQuad<Fixed> stage2_;
+    RMSdB<Fixed> rms_;
 };
 
 class Config : public Gtk::Frame {
@@ -272,11 +356,12 @@ private:
     Config config_;
     Gtk::ToggleButton measButton_;
     Measurement<RMSdB<fix16ll>> rms_;
+    Measurement<ITUBS1770<fix16ll>> itu_;
     Gtk::Statusbar statusBar_;
     Gtk::VBox box_;
 };
 
-AppWindow::AppWindow() : overflowNum_(0), rms_("RMS (dB)")
+AppWindow::AppWindow() : overflowNum_(0), rms_("RMS (dB)"), itu_("ITU BS-1770 (dB)")
 {
     pulseLoop_ = pa_glib_mainloop_new(nullptr);
     pulseApi_ = pa_glib_mainloop_get_api(pulseLoop_);
@@ -302,6 +387,7 @@ AppWindow::AppWindow() : overflowNum_(0), rms_("RMS (dB)")
     box_.add(config_);
     box_.add(measButton_);
     box_.add(rms_);
+    box_.add(itu_);
     box_.add(statusBar_);
     add(box_);
     show_all_children();
@@ -348,6 +434,7 @@ void AppWindow::setState(AppState state)
         config_.set_sensitive(false);
         measButton_.set_sensitive(false);
         rms_.set_sensitive(false);
+        itu_.set_sensitive(false);
         pa_context_connect(pulseCtx_, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
         break;
     case AppState::devices:
@@ -362,7 +449,9 @@ void AppWindow::setState(AppState state)
         config_.set_sensitive(true);
         measButton_.set_sensitive(true);
         rms_.set_sensitive(false);
+        itu_.set_sensitive(false);
         rms_.setValue(0.0);
+        itu_.setValue(0.0);
         break;
     }
     case AppState::connstream:
@@ -381,12 +470,15 @@ void AppWindow::setState(AppState state)
         overflowNum_ = 0;
         rms_.init(config_.getSampleSize());
         rms_.set_sensitive(true);
+        itu_.init(config_.getSampleSize());
+        itu_.set_sensitive(true);
         measButton_.set_sensitive(true);
         break;
     }
     case AppState::disconnstream:
     {
         rms_.set_sensitive(false);
+        itu_.set_sensitive(false);
         config_.set_sensitive(false);
         measButton_.set_sensitive(false);
         pa_stream_disconnect(pulseStream_);
@@ -497,10 +589,16 @@ void AppWindow::measure(int input)
 {
     fix16ll x(input << 1, false);
     rms_.measure(x);
+    itu_.measure(x);
 }
 
 int main(int argc, char* argv[])
 {
+    ITUBS1770<fix16ll> tmp(19200);
+    double v;
+    while (!tmp.step(fix16ll(1), v))
+        ;
+
     auto app = Gtk::Application::create(argc, argv, "org.sma.SoundMeasurementApplication");
     
     AppWindow appWindow;
