@@ -1,4 +1,4 @@
-* display ITU measurement
+* correct ITU meaurement
 * create low/high-pass filter creation process the bands
 * get the weigths for the bands
 * display weighted band measurment
