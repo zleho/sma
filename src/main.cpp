@@ -594,10 +594,18 @@ void AppWindow::measure(int input)
 
 int main(int argc, char* argv[])
 {
-    ITUBS1770<fix16ll> tmp(19200);
     double v;
-    while (!tmp.step(fix16ll(1), v))
+    RMSdB<fix16ll> tmp1(19200);
+    while (!tmp1.step(fix16ll(1), v))
         ;
+    
+    std::cout << v << std::endl;
+
+    ITUBS1770<fix16ll> tmp2(19200);
+    while (!tmp2.step(fix16ll(1), v))
+        ;
+
+    std::cout << v  << std::endl;
 
     auto app = Gtk::Application::create(argc, argv, "org.sma.SoundMeasurementApplication");
     
