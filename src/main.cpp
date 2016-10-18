@@ -126,14 +126,14 @@ public:
     }
 
     BiQuad(Fixed b0, Fixed b1, Fixed b2, Fixed a1, Fixed a2)
-        : b0_(b0), b1_(b1), b2_(b2), a1_(a1), a2_(a2_)
+        : b0_(b0), b1_(b1), b2_(b2), a1_(a1), a2_(a2)
     {
         init();
     }
 
     void init()
     {
-        x1_ = x2_ = y1_ = y2_ = Fixed();
+        x1_ = x2_ = y1_ = y2_ = Fixed(0);
     }
 
     Fixed operator()(Fixed x)
@@ -141,12 +141,6 @@ public:
         auto y 
             = b0_*x + b1_*x1_ + b2_*x2_ 
             - a1_*y1_ - a2_*y2_;
-
-        while (y > Fixed(1))
-            y >>= 1;
-
-        while (y < Fixed(-1))
-            y >>= 1;
 
         y2_ = y1_; y1_ = y;
         x2_ = x1_; x1_ = x;
@@ -271,7 +265,7 @@ std::string Config::getActiveDevice()
 static inline std::string toString(double v)
 {
     std::stringstream ss;
-    ss << std::setprecision(2) << v;
+    ss << v;
     return ss.str();
 }
 
