@@ -133,25 +133,21 @@ public:
 
     void init()
     {
-        x1_ = x2_ = y1_ = y2_ = Fixed(0);
+        w_ = w1_ = w2_ = Fixed(0);
     }
 
     Fixed operator()(Fixed x)
     {
-        auto y 
-            = b0_*x + b1_*x1_ + b2_*x2_ 
-            - a1_*y1_ - a2_*y2_;
-
-        y2_ = y1_; y1_ = y;
-        x2_ = x1_; x1_ = x;
-        
+        w_ = x - a1_*w1_ - a2_*w2_;
+        auto y = b0_*w_ + b1_*w1_ + b2_*w2_;
+        w2_ = w1_;
+        w1_ = w_;
         return y;
     }
 private:
     Fixed b0_, b1_, b2_;
     Fixed a1_, a2_;
-    Fixed x1_, x2_;
-    Fixed y1_, y2_;
+    Fixed w_, w1_, w2_;
 };
 
 template <class Fixed>
