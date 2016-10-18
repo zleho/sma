@@ -142,9 +142,15 @@ public:
             = b0_*x + b1_*x1_ + b2_*x2_ 
             - a1_*y1_ - a2_*y2_;
 
+        while (y > Fixed(1))
+            y >>= 1;
+
+        while (y < Fixed(-1))
+            y >>= 1;
+
         y2_ = y1_; y1_ = y;
         x2_ = x1_; x1_ = x;
-
+        
         return y;
     }
 private:
@@ -594,19 +600,6 @@ void AppWindow::measure(int input)
 
 int main(int argc, char* argv[])
 {
-    double v;
-    RMSdB<fix16ll> tmp1(19200);
-    while (!tmp1.step(fix16ll(1), v))
-        ;
-    
-    std::cout << v << std::endl;
-
-    ITUBS1770<fix16ll> tmp2(19200);
-    while (!tmp2.step(fix16ll(1), v))
-        ;
-
-    std::cout << v  << std::endl;
-
     auto app = Gtk::Application::create(argc, argv, "org.sma.SoundMeasurementApplication");
     
     AppWindow appWindow;
