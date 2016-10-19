@@ -16,7 +16,12 @@ include_directories(
     ${GTKMM_INCLUDE_DIRS}
     )
 
-add_executable(sma src/main.cpp)
+add_executable(sma 
+    src/main.cpp
+    src/Config.cpp
+    src/Application.cpp
+    )
+
 target_compile_options(sma PUBLIC 
     -Wall 
     -pedantic 
