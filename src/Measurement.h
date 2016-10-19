@@ -17,6 +17,7 @@ public:
         box_.add(bar_);
         box_.set_margin_start(10);
         box_.set_margin_end(10);
+        box_.set_margin_bottom(10);
         add(box_);
         setValue(0.0);
     }
