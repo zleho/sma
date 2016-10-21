@@ -15,9 +15,9 @@
 template <class Fixed>
 class RMSdB {
 public:
-    static constexpr double max() 
+    static double max() 
     {
-        return 20*FixedType::power()*std::log10(2);
+        return max_;
     }
 
     using FixedType = Fixed;
@@ -58,10 +58,11 @@ public:
         return false;
     }
 private:
+    static double max_;
     size_t curr_;
     size_t size_;
     Fixed sum_;
     Fixed c1, c2, c3;
 };
 
-
+template <class Fixed> double RMSdB<Fixed>::max_ = 20*Fixed::power()*std::log10(2);

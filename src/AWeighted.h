@@ -4,7 +4,7 @@
 #include "RMSdB.h"
 
 template <class Fixed>
-class ThridOctave {
+class AWeighted {
 public:
     using FixedType = Fixed;
     static constexpr double max()
@@ -12,11 +12,11 @@ public:
         return RMSdB<Fixed>::max();
     }
 
-    ThridOctave()
+    AWeighted()
     {
     }
 
-    explicit ThridOctave(std::size_t size)
+    explicit AWeighted(std::size_t size)
     {
     }
 

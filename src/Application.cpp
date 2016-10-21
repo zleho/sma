@@ -26,7 +26,7 @@ AppWindow::AppWindow()
     : overflowNum_(0), 
       rms_("RMS (dB)"), 
       itu_("ITU BS-1770 (dB)"),
-      third_("Weigthed third-octave (dB)")
+      aWeighted_("A-weigthed (dB)")
 {
     pulseLoop_ = pa_glib_mainloop_new(nullptr);
     pulseApi_ = pa_glib_mainloop_get_api(pulseLoop_);
@@ -53,7 +53,7 @@ AppWindow::AppWindow()
     box_.add(measButton_);
     box_.add(rms_);
     box_.add(itu_);
-    box_.add(third_);
+    box_.add(aWeighted_);
     box_.add(statusBar_);
     add(box_);
     show_all_children();
@@ -101,7 +101,7 @@ void AppWindow::setState(AppState state)
         measButton_.set_sensitive(false);
         rms_.set_sensitive(false);
         itu_.set_sensitive(false);
-        third_.set_sensitive(false);
+        aWeighted_.set_sensitive(false);
         pa_context_connect(pulseCtx_, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
         break;
     case AppState::devices:
@@ -117,10 +117,10 @@ void AppWindow::setState(AppState state)
         measButton_.set_sensitive(true);
         rms_.set_sensitive(false);
         itu_.set_sensitive(false);
-        third_.set_sensitive(false);
+        aWeighted_.set_sensitive(false);
         rms_.setValue(0.0);
         itu_.setValue(0.0);
-        third_.setValue(0.0);
+        aWeighted_.setValue(0.0);
         break;
     }
     case AppState::connstream:
@@ -141,8 +141,8 @@ void AppWindow::setState(AppState state)
         rms_.set_sensitive(true);
         itu_.init(config_.getSampleSize());
         itu_.set_sensitive(true);
-        third_.init(config_.getSampleSize());
-        third_.set_sensitive(true);
+        aWeighted_.init(config_.getSampleSize());
+        aWeighted_.set_sensitive(true);
         measButton_.set_sensitive(true);
         break;
     }
@@ -150,7 +150,7 @@ void AppWindow::setState(AppState state)
     {
         rms_.set_sensitive(false);
         itu_.set_sensitive(false);
-        third_.set_sensitive(false);
+        aWeighted_.set_sensitive(false);
         config_.set_sensitive(false);
         measButton_.set_sensitive(false);
         pa_stream_disconnect(pulseStream_);
@@ -262,7 +262,7 @@ void AppWindow::measure(int input)
     fixie::Fixed<long long, 16> x(input << 1, false);
     rms_.measure(x);
     itu_.measure(x);
-    third_.measure(x);
+    aWeighted_.measure(x);
 }
 
 

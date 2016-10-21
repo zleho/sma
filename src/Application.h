@@ -12,7 +12,7 @@
 #include "fixie.h"
 #include "RMSdB.h"
 #include "ITUBS1770.h"
-#include "ThirdOctave.h"
+#include "AWeighted.h"
 
 enum class AppState : unsigned {
     conn,
@@ -69,7 +69,7 @@ private:
     Gtk::ToggleButton measButton_;
     Measurement<RMSdB<fixie::Fixed<long long, 16>>> rms_;
     Measurement<ITUBS1770<fixie::Fixed<long long, 16>>> itu_;
-    Measurement<ThridOctave<fixie::Fixed<long long, 16>>> third_;
+    Measurement<AWeighted<fixie::Fixed<long long, 16>>> aWeighted_;
     Gtk::Statusbar statusBar_;
     Gtk::VBox box_;
 };
