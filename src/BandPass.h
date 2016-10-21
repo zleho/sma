@@ -14,11 +14,11 @@ public:
     {
         double K = std::tan(M_PI * F / sampleRate);
         double N = 1 / (1 + K/Q + K*K);
-        double b0 = K * K * N;
-        double b1 = 2 * b0;
-        double b2 = b0;
-        double a1 = 2 * (K*K - 1) * N;
-        double a2 = (1 - K/Q + K*K) * N;
+        Fixed b0 = Fixed(K * K * N);
+        Fixed b1 = b0 << 1;
+        Fixed b2 = b0;
+        Fixed a1 = Fixed(2 * (K*K - 1) * N);
+        Fixed a2 = Fixed((1 - K/Q + K*K) * N);
         
         BiQuad<Fixed>(b0, b1, b2, a1, a2);
         BiQuad<Fixed>::init();
@@ -36,11 +36,11 @@ public:
     {
         double K = std::tan(M_PI * F / sampleRate);
         double N = 1 / (1 + K/Q + K*K);
-        double b0 = N;
-        double b1 = -2 * b0;
-        double b2 = b0;
-        double a1 = 2 * (K*K - 1) * N;
-        double a2 = (1 - K/Q + K*K) * N;
+        Fixed b0 = Fixed(N);
+        Fixed b1 = -(b0 << 1);
+        Fixed b2 = b0;
+        Fixed a1 = Fixed(2 * (K*K - 1) * N);
+        Fixed a2 = Fixed((1 - K/Q + K*K) * N);
         
         BiQuad<Fixed>(b0, b1, b2, a1, a2);
         BiQuad<Fixed>::init();
@@ -54,7 +54,7 @@ class BandPass {
         double f = Fc * Fc;
         double a = 148840000.0 * f * f;
         double b = (f + 424.36) * std::sqrt((f + 11599.29)*(f + 544496.41)) * (f + 148840000.0);
-        return a / b;
+        return Fixed(a / b);
     }
 public:
     BandPass()
