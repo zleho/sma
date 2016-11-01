@@ -18,11 +18,10 @@ public:
         double low = 20.0;
         for (int i = 0; i < 10; ++i, low *= 2) {
             double high = 2 * low;
-            double d = high - low / 3;
+            double d = (high - low) / 3;
             double l = low;
-            for (int j = 0; l < high; l += d, ++j) {
+            for (int j = 0; l < high; l += d, ++j)
                 bands_[3*i + j] = BandPass<Fixed>(l + d / 2, d, Q);
-            }
         }
     }
 
@@ -52,7 +51,7 @@ public:
         return false;
     }
 private:
-    BandPass<Fixed> bands_[30]; // 3*10 third octave
+    std::array<BandPass<Fixed>, 30> bands_; // 3*10 third octave
     RMSdB<Fixed> rms_;
 };
 
