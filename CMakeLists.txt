@@ -37,4 +37,3 @@ target_link_libraries(sma
     )
 
 target_compile_options(sma PUBLIC ${PULSE_CFLAGS_OTHER} ${GTKMM_CFLAGS_OTHER})
-
