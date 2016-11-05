@@ -9,6 +9,9 @@ margin-bottom: 2.5cm
 margin-right: 2.5cm
 documentclass: report
 classoption: twoside
+header-includes:
+    - \usepackage{setspace}
+    - \onehalfspacing
 ---
 # Bevezetés
 # Felhasználói dokumentáció
