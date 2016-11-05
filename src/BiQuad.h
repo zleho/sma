@@ -7,15 +7,24 @@ public:
     {
     }
 
-    BiQuad(Fixed b0, Fixed b1, Fixed b2, Fixed a1, Fixed a2)
-        : b0_(b0), b1_(b1), b2_(b2), a1_(a1), a2_(a2)
-    {
-        init();
-    }
-
     void init()
     {
         w_ = w1_ = w2_ = Fixed(0);
+    }
+
+    void init(Fixed b0, Fixed b1, Fixed b2, Fixed a1, Fixed a2)
+    {
+        b0_ = b0;
+        b1_ = b1;
+        b2_ = b2;
+        a1_ = a1;
+        a2_ = a2;
+        init();
+    }
+
+    BiQuad(Fixed b0, Fixed b1, Fixed b2, Fixed a1, Fixed a2)
+    {
+        init(b0, b1, b2, a1, a2);
     }
 
     Fixed operator()(Fixed x)

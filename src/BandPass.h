@@ -20,8 +20,7 @@ public:
         Fixed a1 = Fixed(2 * (K*K - 1) * N);
         Fixed a2 = Fixed((1 - K/Q + K*K) * N);
         
-        BiQuad<Fixed>(b0, b1, b2, a1, a2);
-        BiQuad<Fixed>::init();
+        BiQuad<Fixed>::init(b0, b1, b2, a1, a2);
     }
 };
 
@@ -42,8 +41,7 @@ public:
         Fixed a1 = Fixed(2 * (K*K - 1) * N);
         Fixed a2 = Fixed((1 - K/Q + K*K) * N);
         
-        BiQuad<Fixed>(b0, b1, b2, a1, a2);
-        BiQuad<Fixed>::init();
+        BiQuad<Fixed>::init(b0, b1, b2, a1, a2);
     }
 };
 
