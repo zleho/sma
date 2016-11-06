@@ -18,6 +18,5 @@ Compilation:
  - make
 
 Document creation:
- - cd doc
- - ./makedoc.sh
+ - make doc
 
