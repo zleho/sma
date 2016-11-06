@@ -42,7 +42,7 @@ add_custom_command(
     OUTPUT doc.pdf 
     COMMAND pandoc 
     ARGS -S ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md -o doc.pdf 
-    DEPENDS doc/doc.md
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md
     )
 
 add_custom_target(doc DEPENDS doc.pdf)
