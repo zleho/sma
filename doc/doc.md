@@ -1,3 +1,6 @@
+<!--- 
+vim: spell:spelllang=hu
+-->
 ---
 papersize: a4
 lang: hu-HU
@@ -49,7 +52,7 @@ Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intelleg
 
 Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
 
-### Bementi jel feldolgozása
+### Bemeneti jel feldolgozása
 
 Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
 
