@@ -18,13 +18,33 @@ header-includes:
 ---
 # Bevezetés
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
-
 ## Motiváció
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+Hangosságnak nevezzük a hang azon tulajdonságát, amely halktól a hangosig skálázható.
+Ez szoros összefüggésben van a hang fizikai erejével, azonban érzékelése a fülben nemcsak fizikai és fiziológiai,
+hanem pszichés folyamat is.
 
-## Szabványok és ajánlások
+Többen, többféleképpen értelmezik ezt a pszichoakusztikai tulajdonságát a hangnak.
+Ami a különböző mérésekben azonos, hogy egytől egyig mind a logaritmikus decibel skálát használjak.
+Ennek az oka az emberi hallásra vezethető vissza, egy az amplitúdójában kétszer erősebb jelet,
+nem hallunk kétszer hangosabban.
+Az emberi hallás átlagolja a hallott hangot 600ms és 1s között. 
+Ezt a mérések is tükrözik és általában valamilyen intervallumonként átlagolt értékkel dolgoznak.
+
+A legegyszerűbb mérés pusztán a hang fizikai tulajdonságait veszi alapul. 
+Ez egy adott intervallumra vett jel négyzetes átlagának a gyökét jelenti (RMS, root mean square).
+
+További megoldás ha a bemeneti jelet valamilyen szűrőn áteresztve értékeljük. 
+A szűrőt általában kísérletezéssel állapítják meg.
+Az ITU által javasolt BS-1770 az úgynevezett K-súlyozó szűrőt használja a célra.
+
+Felismerve a tényt, hogy különböző frekvencia tartományokban a változásokra különbözően reagál a fül, 
+egy lehetséges módszer a bementi jel kritikus tartományokra bontása, majd az egyes tartományok súlyozása valamilyen függvénnyel.
+Ilyen függvény például az ISO 61672:2003 által előírt A-súlyozás.
+
+Mindkét esetben a keletkezett jelből intervallumonként RMS számítunk.
+
+## A megvalósítandó program
 
 Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
 
