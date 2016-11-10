@@ -44,9 +44,19 @@ Ilyen függvény például az ISO 61672:2003 által előírt A-súlyozás.
 
 Mindkét esetben a keletkezett jelből intervallumonként RMS számítunk.
 
-## A megvalósítandó program
+## A megvalósított program
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+A program a fentebb említett három mérés (RMS, ITU BS-1770, és ISO 61672:2003) eredményét mutatja valós időben, 
+miközben egyes részei külön-külön is felhasználhatóak és kombinálhatóak további jelfeldolgozásra a jövőben.
+
+A forráskód jól elkülöníthető részei lehetőséget nyújtanak:
+
+- bementi jel fogadása PulseAudio segítségével,
+- generikus fixpontos számábrázolás elősegítése, melynek pontosságát a felhasználó határozza meg,
+- digitális szűrők megvalósítás biquad-okkal,
+- low-pass, high-pass, és band-pass filterek egyszerű létrehozása,
+- adott intervallumon mérések elvégzése,
+- a mérések grafikus megjelenítése gtkmm-3.0 segítségével.
 
 # Felhasználói dokumentáció
 
