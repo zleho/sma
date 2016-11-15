@@ -49,6 +49,12 @@ Mindkét esetben a keletkezett jelből intervallumonként RMS számítunk.
 A program a fentebb említett három mérés (RMS, ITU BS-1770, és ISO 61672:2003) eredményét mutatja valós időben, 
 miközben egyes részei külön-külön is felhasználhatóak és kombinálhatóak további jelfeldolgozásra a jövőben.
 
+Jelenleg a legtöbb hangkártya 16 bites előjeles egészéket használ a bemeneti, illetve kimeneti jel ábrázolásaként.
+A program, miután a jelet kiolvasta a hangkártyáról, ezt az egész számot egy 15+1 bit pontos fixpontos számnak tekinti,
+majd végül belül végig 16 bit pontossággal számol. A decibel számításakor a $20\log_{10} \frac{p}{p_0}$ képletet használjuk, 
+ahol $p_0 = 2^{-16}$, a legkisebb ábrázolható számot, legkisebb mérhető érték. $p$ maximális értéke elméletben
+$1$, így a decibel maximális értéke jelen esetben $96.3296$ dB.
+
 A forráskód jól elkülöníthető részei lehetőséget nyújtanak:
 
 - bementi jel fogadása PulseAudio segítségével,
