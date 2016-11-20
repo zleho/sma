@@ -142,6 +142,13 @@ ahol $N=fT$, $T$ a mérési intervallum hossza másodpercben és $f=48000$ a min
 
 ### ITU BS-1770
 
+Az ITU által ajánlott algoritmus első két lépését hajtjuk végre, azaz
+1. a bemeneti jelet $K$ frekvencia súlyozó szűrőn keresztül eresztve
+2. RMS számolunk az intervallumon.
+
+Az első lépés két szűrő együttese. Az első a fej akusztikáját veszi figyelembe, ahol a fej formáját tömör gömbnek veszi,
+majd egy egyszerű high-pass szűrőn keresztül ereszti a jelet. A két szűrő együtthatói az ajánlásában megtalálhatóak.
+
 ### A-weighted
 
 ## A programkönyvtárak felhasználása
