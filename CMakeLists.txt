@@ -37,12 +37,13 @@ target_link_libraries(sma
     )
 
 target_compile_options(sma PUBLIC ${PULSE_CFLAGS_OTHER} ${GTKMM_CFLAGS_OTHER})
+file(GLOB IMAGE_LIST doc/*.pdf)
 
 add_custom_command(
     OUTPUT doc.pdf
     COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/doc/*.png ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND pandoc ARGS -S ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md -o doc.pdf 
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md 
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md ${IMAGE_LIST}
     )
 
 add_custom_target(doc DEPENDS doc.pdf)

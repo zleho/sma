@@ -108,16 +108,41 @@ Könyvtártól függően emelt privilégiumra lehet szükség a parancs kiadás�
 
 ## A program indítása és használata
 
+A program az `sma` parancs kiadásával indítható. Miután a program elindult, az először csatlakozok a lokális
+PulseAudio szerverhez, majd lekérdezi a lehetséges bemeneti eszközök listáját. Ezek után a program belép a konfigurációs
+állapotba, ahol kiválaszthatjuk a bemeneti eszközt (1. Ábra), valamint megadhatjuk a mérési intervallum hosszát másodpercben,
+$0.1$ és $1$ másodperc között (2. Ábra), tizedmásodperces lépésközzel.
+
 ![Bemeneti eszköz kiválasztása](input.png){ width=300px }
 
 ![Mérés méretének kiválasztása](meassize.png){ width=300px }
 
-![Mérés indítása](meas.png){ width=300px }
+Miután kiválasztottuk a nekünk megfelelő paramétereket, a konkrét mérés a `MEASURE` gombra való kattintással indítható el (3. Ábra). 
+Ezek után aktiválódnak az egyes mérések és de-aktiválódnak az egyes konfigurációs lehetőségek, amíg a mérés véget nem ér.
+A mérés befejezését a `MEASURE` gombra történő ismételte kattintás idézi elő. A mérések aktuális értékét a program számszerűen és
+vizuálisan is mutatja (4. Ábra).
+
+![Mérés indítása](measbutton.png){ width=300px }
 
 ![Mérés](meas.png){ width=300px }
 
+A program minden pillanatban jelzi, hogy éppen milyen állapotban van (5. Ábra).
+
 ![Jelenlegi státusz](status.png){ width=300px }
 
+## Mérések
+
+### RMS
+
+A program által elvégzett legegyszerűbb mérés az úgynevezett **root-mean-square** kalkuláció egy adott intervallumon, azaz
+
+$$20\log_{10}\frac{\sqrt{\sum_{i=1}^{N} \frac{x_i^2}{N}}}{2^{-16}},$$
+
+ahol $N=fT$, $T$ a mérési intervallum hossza másodpercben és $f=48000$ a mintavételezés frekvenciája és $x_i$ az $i$-ik mért jel. 
+
+### ITU BS-1770
+
+### A-weighted
 
 ## A programkönyvtárak felhasználása
 
