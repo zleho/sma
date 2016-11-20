@@ -55,26 +55,69 @@ majd végül belül végig 16 bit pontossággal számol. A decibel számításak
 ahol $p_0 = 2^{-16}$, a legkisebb ábrázolható számot, legkisebb mérhető érték. $p$ maximális értéke elméletben
 $1$, így a decibel maximális értéke jelen esetben $96.3296$ dB.
 
-A forráskód jól elkülöníthető részei lehetőséget nyújtanak:
+A forráskód jól elkülöníthető részei felelősek a következő funkciókért:
 
-- bementi jel fogadása PulseAudio segítségével,
-- generikus fixpontos számábrázolás elősegítése, melynek pontosságát a felhasználó határozza meg,
-- digitális szűrők megvalósítás biquad-okkal,
+- bemeneti jel fogadása PulseAudio segítségével,
+- generikus fixpontos számábrázolás, melynek pontosságát a felhasználó határozza meg,
+- digitális szűrők megvalósítása biquad-okkal,
 - low-pass, high-pass, és band-pass filterek egyszerű létrehozása,
 - adott intervallumon mérések elvégzése,
-- a mérések grafikus megjelenítése gtkmm-3.0 segítségével.
+- a progam felhasználói felületén a konfigurációs paraméterek és a mérések grafikus megjelenítése gtkmm-3.0 segítségével.
 
 # Felhasználói dokumentáció
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
-
 ## A program üzembe helyezése
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+A program telepítése bármilyen operációs rendszeren lehetséges amelyen megtalálhatók az alábbi szoftverek, programkönyvtárak 
+és azok függőségei:
+
+- cmake, legalább 3.5.0,
+- C++11 kompatibilis fordító, például g++ vagy clang megfelelő verziói,
+- make,
+- PulseAudio,
+- gtkmm, 3.0 vagy annál újabb verzió a 3-as szériából.
+
+A telepítés lépései a következőek:
+
+1. A forrás beszerzése az internetről vagy a mellékelt hordozóról:
+```
+# git clone https://github.com/zleho/sma.git
+```
+
+2. Egy ideiglenes munka könyvtár létrehozása és aktívvá tétele:
+```
+# mkdir sma-build
+# cd sma-build
+```
+
+3. CMake parancs futtatása a megfelelő paraméterekkel. A paraméterek leírása megtalálható a CMake dokumentációjában:
+```
+# cmake <sma-source>
+```
+
+4. A program fordítása:
+```
+# make
+```
+
+5. Opcionálisan a program telepítése végeleges helyére, ami CMake paraméter, aminek alap beállítása `/usr/local/`. 
+Könyvtártól függően emelt privilégiumra lehet szükség a parancs kiadásánál:
+```
+# make install
+```
 
 ## A program indítása és használata
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+![Bemeneti eszköz kiválasztása](input.png){ width=300px }
+
+![Mérés méretének kiválasztása](meassize.png){ width=300px }
+
+![Mérés indítása](meas.png){ width=300px }
+
+![Mérés](meas.png){ width=300px }
+
+![Jelenlegi státusz](status.png){ width=300px }
+
 
 ## A programkönyvtárak felhasználása
 
