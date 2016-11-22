@@ -151,7 +151,23 @@ majd egy egyszerű high-pass szűrőn keresztül ereszti a jelet. A két szűrő
 
 ### A-weighted
 
+Az egyik leggyakrabban használt hangosság mérését elősegítő görbe az úgynevezett A-súlyozás, melyet ISO 61672:9001 és
+több nemzet szabványa is a így definiál:
+
 $$A(f)=\frac{12200^4 \cdot f^4}{(f^2 + 20.6^2) \sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)} (f^2 + 12200^2)}$$
+
+A függvény görbéjét a 6. ábra szemlélteti.
+
+![A-súlyozás](aweighting.png){ width=50% }
+
+Használatához a jelet általában oktávokra vagy harmad-oktávokra bontják, majd ezeken a kritikus sávba eső jelet
+a sáv középértékén számolt súllyal számítják bele RMS-be az
+
+$$\sum_{j=1}^K{w_j \cdot x_{ij}},$$
+
+értékét, ahol $K$ a kritikus sávok száma és $x_{ij}$ pedig a $j$-k sávba szűrt jel.
+
+A program 20 Hz és 20 kHz közötti sávjait és azok súlyait a 1. táblázatban találjuk meg.
 
 | Alsó határ (Hz) | Felső határ (Hz) | Közép frekvencia (Hz) | Súly     |
 |-----------------|------------------|-----------------------|----------|
