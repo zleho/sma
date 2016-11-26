@@ -206,7 +206,81 @@ A program 20 Hz és 20 kHz közötti sávjait és azok súlyait a 1. táblázatb
 
 ## A programkönyvtárak felhasználása
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+### Fixpontos aritmetika
+
+A `fixie` névtér `Fixed` osztály sablonja a `Fixed.h` fájlban található. A példányosításhoz kettő sablon paraméterre van szükség:
+
+- az ábrázolásra használt egész típus,
+- a fix pont helye.
+
+```c++
+template <typename Int, std::size_t Q> 
+struct Fixed;
+```
+
+Példányosításkor, fordítási időben a következő dolgokat ellenőriződnek:
+
+- `std::is_integral_type<Int>`, illetve
+- `Q` belefér-e `Int`-be.
+
+Példák szabályos példányosításokra:
+
+```c++
+using fixie::Fixed;
+
+// 1 bit előjel, 31 bit egész rész, 32 bit törtrész
+using Fix16ll = Fixed<long long, 32>;
+
+// 1 bit előjel, 0 bit egész rész, 15 bit törtrész
+typedef Fixed<short, 15> Fix15s;
+
+// 0 bit előjel, 16 bit egész rész, 16 bit törtrész
+using Fix16ul = Fixed<unsigned long, 16>;
+```
+
+Tetszőleges számból kiindulva létrehozhatunk fix-pontos számot, a konstruktor elvégzi a konverziót.
+A konstruktorok minden esetben explicitek, hogy elkerüljük a véletlen konverziókat.
+Tetszőleges másik fix-pontos számból létrehozhatunk egy újat.
+Lehetőség van a fix-pontos reprezentáció megadására is ha egész számot elváró konstruktor második paraméterével utalunk rá, 
+hogy ne legyen konverzió.
+
+```c++
+auto x = Fix16ll(1);
+auto y = Fix16ll(1.0);
+auto z = Fix16ll(Fix15s(0.5));
+auto w = Fix15s(1<<14, false); // 0.1
+```
+
+A beépített számtípusokra való visszatérés explicit típuskonverzió segítségével lehetséges.
+Egész konverzió esetén a szám egész részét kapjuk meg.
+
+```c++
+auto xx = static_cast<int>(x);
+auto yy = static_cast<double>(y);
+```
+
+A sablon-osztály támogatja az összes lebegőpontos számokra támogatott aritmetikai és logikai összehasonlító műveletet.
+Továbbá lehetőség van fix-pontos számok $\log_2$ számítására.
+
+### Digitális szűrők
+
+A `BiQuad` osztály-sablon egy digitális, másodrendű rekurzív lineáris szűrő megvalósítása.
+A sablon segítségével lehet meghatározni, hogy a példányosított osztály milyen számábrázolási módszerrel dolgozzon.
+
+```c++
+template <typename T>
+class BiQuad;
+```
+
+Az osztály a differencia egyenletet használja:
+
+$$y_n = b_0w_n + b_1w_{n-1} + b_2w_{n-2},$$
+
+ahol
+
+$$w_n = x_n - a_1w_{n-1} - a_2w_{n-2}.$$
+
+Az $b_i$, $a_j$ konstruktor-paraméterek. Az `init()` metódussal állíthatjuk vissza a kezdeti állapotot, ahol $w_{-1} = w_{-2} = 0$.
 
 # Fejlesztői dokumentáció
 
