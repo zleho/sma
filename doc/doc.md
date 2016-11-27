@@ -286,7 +286,118 @@ Az $b_i$, $a_j$ konstruktor-paraméterek. Az `init()` metódussal állíthatjuk 
 
 ## Megvalósítási terv
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+### Fixpontos aritmetika
+
+A racionális számok egy egyszerű és hatékony megvalósítása a fixpontos számábrázolás.
+A fixpontos szám valamilyen skálázás után egész számként van ábrázolva a memóriában.
+A skálázás mértéke függ az architcechtúrától, és általában kettőnek valamely hatványa.
+
+Legyen $Q(m,n) \doteq \{ \frac{k}{2^n} | k \in \mathbb{Z}, k \in [-2^n,2^n-1 ] \}$ az előjeles, $n+m+1$ biten ábrázolt fixpontos számok halmaza.
+Ekkor egy $q \in Q(m,n)$-nak megfelelő egész szám a memóriában a $\hat{q} = [2^nq] \in [-2^{n+m},2^{n+m-1}-1]$, ahol $[.]$ az egészrész függvény.
+
+Ha $a,b \in Q(m,n)$, akkor
+
+- $\widehat{a+b} \doteq \hat{a} + \hat{b}$,
+- $\widehat{ab} \doteq \hat{a}\hat{b}2^{-n}$,
+- $\widehat{a/b} \doteq \frac{\hat{a}2^n}{\hat{b}}$,
+- $\widehat{a=b} \doteq \hat{a} = \hat{b}$,
+- $\widehat{a < b} \doteq \hat{a} < \hat{b}$.
+
+A megvalósítás feladata egy olyan adattípus sablon létrehozása amire teljesülnek a fentiek,
+illetve sablon-paraméterként megadható az ábrázoláshoz használható egész típus, valamint a
+fix pont helye, azaz $n$ éréke.
+
+A osztály sablon adjon lehetőséget egyszerűen elvégezhető konverziókat más beépített számtípusokra,
+valamint a többi sablon példányra.
+
+A példányosítás nem legyen lehetséges degenerált esetekre, ezek vizsgálata fordítási időben történjen.
+Minden konverzió legyen explicit.
+
+Szükség van még $\log_2$ számításra fixpontos számokra.
+
+Az osztály sablon felülete a felhasználó felé:
+
+```c++
+template <typename Int, std::size_t Q>
+struct Fixed {
+    using IntType = Int;
+
+    constexpr auto power(); // Q
+    constexpr auto denom(); // 2^Q
+
+    IntType repr;
+    
+    Fixed();
+    
+    template <typename OtherInt> 
+    explict Fixed(OtherInt);
+    
+    template <typename Floating> 
+    explicit Fixed(Floating);
+
+    template <typename OtherInt, std::size_t OtherSize>
+    Fixed(Fixed<OtherInt, OtherSize>);
+
+    template <typename OtherInt>
+    explicit operator OtherInt();
+    
+    template <typename Floating>
+    explicit operator Floating();
+
+    Fixed& operator+=(Fixed);
+    Fixed& operator-=(Fixed);
+    Fixed& operator*=(Fixed);
+    Fixed& operator/=(Fixed);
+
+    template <typename OtherInt>
+    Fixed& operator*=(OtherInt);
+    
+    template <typename OtherInt>
+    Fixed& operator/=(OtherInt);
+};
+
+template <typename Int, std::size_t Q>
+Fixed<Int, Q> operator-(Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+Fixed<Int, Q> operator+(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+Fixed<Int, Q> operator-(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+Fixed<Int, Q> operator*(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+Fixed<Int, Q> operator/(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator==(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator!=(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator==(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator!=(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator<(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator<=(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator>(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+bool operator>=(Fixed<Int, Q>, Fixed<Int, Q>);
+
+template <typename Int, std::size_t Q>
+Fixed<Int, Q> log2(Fixed<Int, Q>);
+```
 
 ## Megvalósítás
 
