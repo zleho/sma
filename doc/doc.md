@@ -401,7 +401,61 @@ Fixed<Int, Q> log2(Fixed<Int, Q>);
 
 ### Digitális szűrők
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+BiQuad-nak nevezzük azokat a másodrendű, lineáris, rekurzív szűrőket, melyeknek kettő zérushelye és kettő szingularitása van.
+Az elnevezés a bi-kvadratikus szóból ered, hiszen a $Z$ tartományban a szűrők átmenet-függvénye kettő darab másodrendű polinom hányadosa,
+azaz:
+
+$$H(z) = \frac{b_0+b_1z^{-1}+b_2z^{-2}}{a_0+a_1z^{-1}+a_2z^{-2}}$$
+
+A függvény egyszerűbb alakja miután minden konstanst beosztottunk $a_0$-val:
+
+$$H(z) = \frac{b_0+b_1z^{-1}+b_2z^{-2}}{1+a_1z^{-1}+a_2z^{-2}}$$
+
+Az implementáció során többfelé differencia egyenletből is választhatunk. A legegyszerűbb eset a Direct Form I,
+ahol az $a_0$-val való normalizálás után a képlet
+
+$$y_n = b_0x_n + b_1x_{n-1} + b_2x_{n-2} - a_1y_{n-1} - a_2y_{n-2}.$$
+
+A másik, úgynevezett Direct Form II esetén
+
+$$y_n = b_0w_n + b_1w_{n-1} + b_2w_{n-2},$$
+
+ahol
+
+$$w_n = x_n - a_1w_{n-1} - a_2w_{n-2}.$$
+
+Alapvető elvárás, hogy a megvalósítandó osztály ne függjön a számábrázolástól,
+még ha az applikáció végig ugyanazt az ábrázolást használja.
+A felhasználó döntése legyen az ábrázolás és a kívánt pontosság.
+Az ábrázolásnál használt számtípus az osztály sablon paramétere kell, hogy legyen.
+További elvárás a felület felé, hogy tetszőleges számú lépés után a belső állapota az osztálynak visszaállíthatő legyen
+a kezdeti állapotra, mintha az objektum éppen abban a pillanatban lett volna létrehozva.
+A függvényhívás operator segítségével imitálható, hogy az objektum tulajdonképpen egy átmenet függvényt jelképez.
+
+A fentieknek megfelelően az osztály sablon felülete a következő:
+
+```c++
+template <typename Number>
+class BiQuad {
+public:
+    using NumberType = Number;
+    BiQuad();
+    BiQuad(
+        Number b0, Number b1, Number b2
+        Number a1, Number a2
+    );
+
+    void init();
+    Number operator()(Number x);
+};
+```
+
+Az K-súlyozás kettő darab BiQuad szűrő egymás utáni alkalmazásával kapjuk a mérni kívánt jelet.
+Az ITU BS-1770 ajánlás megadja a BiQuad-ok által használt konstansok értékét.
+
+Az A-súlyozáshoz a bemeneti jelet harmadoktávokra kell bontanunk, ehhez band-szűrőkre van szükség.
+A band-pass szűrők egy lehetséges implementációja egy low-pass és egy high-pass egymás utáni alkalmazása a bemeneti jelre.
+Low-pass és high-pass szűrők egyik lehetséges implementációja szintén lehetséges BiQuad-kal.
 
 ## Megvalósítás
 
