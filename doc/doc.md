@@ -143,6 +143,7 @@ ahol $N=fT$, $T$ a mérési intervallum hossza másodpercben és $f=48000$ a min
 ### ITU BS-1770
 
 Az ITU által ajánlott algoritmus első két lépését hajtjuk végre, azaz
+
 1. a bemeneti jelet $K$ frekvencia súlyozó szűrőn keresztül eresztve
 2. RMS számolunk az intervallumon.
 
@@ -457,12 +458,72 @@ Az A-súlyozáshoz a bemeneti jelet harmadoktávokra kell bontanunk, ehhez band-
 A band-pass szűrők egy lehetséges implementációja egy low-pass és egy high-pass egymás utáni alkalmazása a bemeneti jelre.
 Low-pass és high-pass szűrők egyik lehetséges implementációja szintén lehetséges BiQuad-kal.
 
-## Megvalósítás
+Az $s$-tartományban egy másodrendű low-pass szűrő átmenet függvénye:
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+$$H(s) = \frac{1}{s^2 + \frac{s}{Q} + 1}.$$
 
-## Tesztelés
+Ahhoz, hogy $Z$ tartományba transzformáljuk a fenti függvényt egyrészt $s$-t ki kell fejeznünk $z$ függvényeként,
+másrészt a teljes komplex teret rá kell transzformalunk a körkörös $z$ síkra.
+Ha $F_c$ a low-pass frekvencia, $F_s$ pedig a minta vételezési frekvencia, akkor az így kapott transzformáció:
 
-Lorem ipsum dolor sit amet, duo modus quidam consequat an. Alii vocibus intellegat ut duo. Eos ex melius aeterno vivendo, posse doming reformidans id vel. In tale mundi sea. Ex mea assum tincidunt efficiantur. Option pertinax ex sea, ferri malis phaedrum nam no.
+$$s = \frac{1}{K}\frac{z-1}{z+1},$$
 
+ahol $K = \tan \frac{\omega T}{2}$ és $\omega T = 2 \pi \frac{F_c}{F_s}$.
+
+Ha ezt behelyettesítjük az eredeti képletbe azt kapjuk, hogy
+
+$$H(z) = \frac{1}{(\frac{1}{K}\frac{z-1}{z+1})^2 + \frac{\frac{1}{K}\frac{z-1}{z+1}}{Q} + 1}.$$
+
+További egyszerűsítés és átrendezés után kapjuk, hogy
+
+$$H(z) = \frac{K^2 + 2K^2z_{-1} + K^2z^{-2}}{(K^2 + \frac{K}{Q} + 1) + 2(K^2-1)z^{-1} + (K^2 - \frac{K}{Q} + 1)z^{-2}}.$$
+
+Ezek után a BiQuad konstansok úgy alakulnak, hogy
+
+$$b_0 = K^2, b_1 = 2K^2 = 2b_0, b_2 = K^2 = b_0,$$
+
+valamint
+
+$$a_0 = K^2 + \frac{K}{Q} + 1, a_1 = 2(K^2-1), a_2 = K^2 - \frac{K}{Q} + 1.$$.
+
+Normalizálás után kapjuk, hogy
+
+$$b_0 = \frac{K^2}{K^2 + \frac{K}{Q} + 1}, b_1 = 2b_0, b_2 = b_0,$$
+
+valamint
+
+$$a_0 = 1, a_1 = \frac{2(K^2-1)}{K^2 + \frac{K}{Q} + 1}, a_2 = \frac{K^2 - \frac{K}{Q} + 1}{K^2 + \frac{K}{Q} + 1}.$$
+
+A szűrőhöz kapcsolódó $Q$ konstans értékének megválasztása a felhasználó feladata, Butterworth szűrők esetén az érték $\frac{1}{\sqrt{2}}$.
+
+Mivel a konstansok kiszámítása nem a mérés közben történik, így lebegőpontos számok használata engedélyezett és pontosság miatt javallott.
+A mintavételi frekvencia sablon paraméter. A megvalósítandó osztály sablon felület:
+
+```c++
+template <typename Number, std::size_t Fs>
+class LowPass : public BiQuad<Number> {
+public:
+    LowPass(double Fc, double Q);
+};
+```
+
+Hasonló levezetés során kapjuk, hogy a high-pass biquad konstansait:
+
+$$b_0 = \frac{1}{1+\frac{K}{Q} + K^2}, b_1 = -2b_0, b_2 = b_0,$$
+
+valamint
+
+$$a_1 = 2\frac{K^2 -1}{1+\frac{K}{Q} + K^2}, a_2 = \frac{1- \frac{K}{Q} + K^2}{1+\frac{K}{Q} + K^2}.$$
+
+Band-pass szűrők esetén a központi frekvenciából és a sávszélességből könnyedén meghatározható az alkamazandó
+low-pass és high-pass szűrő. A osztály sablon által megvalósítandó felület:
+
+```c++
+typename <typename Number, std::size_t Fs>
+class BandPass {
+public:
+    BandPass(double Fc, double bandWidth, double Q);
+    Number operator()(Number);
+};
+```
 
