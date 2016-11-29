@@ -145,7 +145,7 @@ ahol $N=fT$, $T$ a mérési intervallum hossza másodpercben és $f=48000$ a min
 Az ITU által ajánlott algoritmus első két lépését hajtjuk végre, azaz
 
 1. a bemeneti jelet $K$ frekvencia súlyozó szűrőn keresztül eresztve
-2. RMS számolunk az intervallumon.
+2. RMS-t számolunk az intervallumon.
 
 Az első lépés két szűrő együttese. Az első a fej akusztikáját veszi figyelembe, ahol a fej formáját tömör gömbnek veszi,
 majd egy egyszerű high-pass szűrőn keresztül ereszti a jelet. A két szűrő együtthatói az ajánlásában megtalálhatóak.
@@ -526,4 +526,104 @@ public:
     Number operator()(Number);
 };
 ```
+
+### Mérések
+
+Követelmény, hogy az applikáció könnyedén kiegészíthető legyen új mérésekkel.
+Ehhez a méréseknek egységes felületet kell nyújtani a külvilág felé.
+További elvárás, hogy ennek a felületnek le adjon hozzá a futási időhöz,
+pl. ne járjon virtuális függvény hívással. Ezért a mérés sablon paramétere
+legyen a mérést futtató entitásnak.
+
+A számábrázolás, illetve annak pontossága,
+valamint az egy periódusban mért jel mennyisége fordítási idejű,
+azaz sablonparaméter legyen.
+
+Mivel nem biztosítható, hogy egyszerre egy mérési intervallum összes adata
+rendelkezésre áll amikor a felület megfelelő metódusa meghívásra kerül, ezért
+a felületnek jeleznie kell, hogy mikor ért véget egy mérési periódus.
+Ez a követelmény hatással van a mérésnél használt algoritmusokra is.
+
+Hogy a mérési eredmény szemléltetését megkönnyítsük,
+szükségünk van a mérési eredmény által felvehető maximumra is,
+a minimum az összes minket érintő méréseben 0.
+Természetesen ez az érték függ a felvehető minimális értéktől,
+hiszen decibel alapú a skála.
+
+A fentiek alapján a következő felülettel kell rendelkeznie az osztályoknak:
+
+```c++
+template <typename Number>
+class Measurement {
+public:
+    static Number max();
+    Measurement(std::size_t size);
+    bool step(Number in, Number& out);
+    void init();
+};
+```
+
+Itt `Measurement` nem egy konkrét osztály, hanem egy szerződés a forráskód többi része felé.
+A `step()` függvény `true`-val kell visszatérnie ha egy mérési intervallum végére érkezett,
+továbbá ebben az esetben meg kell hogy hívja `init()`-et.
+
+Minden elvégzendő mérés alapja az első mérés, azaz root-mean-square számítás.
+Tulajdonképpen a többi mérés mindössze az RMS bemenetét változtatja.
+Egy tetszőleges RMS-en alapuló mérésnek megfelelő osztály egy lehetséges megvalósítása:
+
+```c++
+template<typename Number>
+class BasedOnRMS {
+public:
+    static Number max()
+    { 
+        return RMS<Number>::max(); 
+    }
+    
+    BasedOnRMS(std::size_t size) : rms_(size) {}
+    
+    void init(); // to be defined
+    bool step(Number in, Number& out)
+    {
+        if (step(f(in), out) {
+            init();
+            return true;
+        }
+
+        return false;
+    }
+private:
+    Number f(Number x); // to be defined
+    RMS<Number> rms_;
+};
+```
+
+Az **root-mean-square** kalkuláció egy adott intervallumon, azaz
+
+$$20\log_{10}\frac{\sqrt{\sum_{i=1}^{N} \frac{x_i^2}{N}}}{p_0},$$
+
+ahol $N=fT$, $T$ a mérési intervallum hossza másodpercben,
+$f$ a mintavételezés frekvenciája és $x_i$ az $i$-ik mért jel,
+$p_0$ pedig a legkisebb mérhető érték abszolút értéke.
+
+ITU mérés esetén az alkalmazás a bemeneti jelet $K$ súlyozó szűrőn keresztül eresztve RMS-t számol az intervallumon.
+Az K szűrő két BiQuad szűrő együttese.
+
+Az A-súlyozást ISO 61672:9001 és több nemzet szabványa is a így definiálja:
+
+$$A(f)=\frac{12200^4 \cdot f^4}{(f^2 + 20.6^2) \sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)} (f^2 + 12200^2)}$$
+
+A függvény görbéjét a 2.6. ábra szemlélteti.
+
+A jelet harmad-oktávokra bontva band-pass szűrőkkel, a kritikus sávnak középértékén számolt súllyal összegezzük, azaz
+
+$$\sum_{j=1}^K{w_j \cdot x_{ij}},$$
+
+ahol $K$ a kritikus sávok száma és $x_{ij}$ pedig a $j$-k sávba szűrt jel.
+
+Mivel a az emberi hallás 20Hz és 20kHz közé tehető, és egy oktáv emelkedés az kétszeres szorzónak felel meg a frekvenciában,
+ezért 30 darab kritikus sávunk lesz.
+
+Az ITU által megadott BiQuad konstansok 48kHz-es mintavételhez vannak megadva, emiatt a többi mérésnél is azt használjuk az egyszerűség kedvéért.
+Továbbá ezt majd minden forgalomban lévő hangkártya egységesen támogatja.
 
