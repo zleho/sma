@@ -527,6 +527,35 @@ public:
 };
 ```
 
+### Bemeneti jel feldolgozása
+
+A bemeneti jel feldolgozására több problémát is számba kell venni.
+Egyrészt olyan mintavételi frekvenciát és számábrázolást kell találnunk,
+ami támogatott a legtöbb hangkártya által. A közös pont a jelenleg,
+amit a piacon lévő hangkártyák támogatnak az a 48kHz-es mintavétel
+$Q(0,15)$ számábrázolással.
+
+Másrészt olyan feldolgozási algoritmusokat kell használni amelyet a legtöbb hangkártyával
+foglalkozó programozási felület támogat. Szinte minden esetben építhetünk arra,
+hogy a feldolgozáshoz használt programkönyvtár a hattérben bufferel számunkra,
+illetve hogy valamilyen absztrakt esemény ciklusra fűzhetjük fel az általunk
+megvalósított függvényeket amik meghívódnak a nekik megfelelő események esetén.
+
+Általában a programkönyvtárat felhasználó alkalmazás feladata, hogy a ciklusmagon egyet
+iteráljon.
+
+Szükségünk van még a lehetséges bementi eszközök listájára, hogy az alkalmazás felhasználója
+eldönthesse melyik bemeneti eszközről jövő jelet szeretné az applikációval elemeztetni.
+
+Fel kell készülni arra az esetre ha nem áll elegendő mért jelmennyiség a rendelkezésünkre
+amikor az ciklus meghívja a jelfeldolgozásra biztosított függvényünket, azaz a méréseknek
+képeseknek kell lennie kezelnie ha egy mérési intervallum jelmennyisége több részletben kerül
+feldolgozásra és hogy a mérési periódus vége nem feltétlen esik egy a függvény végrehajtás
+legvégén.
+
+Tudni kell kezelni azokat az eseteket amikor túl sok bementi jel kerül a bufferbe
+és nem az applikáció nem képes időben feldolgozni az adott jelmennyiséget.
+
 ### Mérések
 
 Követelmény, hogy az applikáció könnyedén kiegészíthető legyen új mérésekkel.
@@ -624,6 +653,25 @@ ahol $K$ a kritikus sávok száma és $x_{ij}$ pedig a $j$-k sávba szűrt jel.
 Mivel a az emberi hallás 20Hz és 20kHz közé tehető, és egy oktáv emelkedés az kétszeres szorzónak felel meg a frekvenciában,
 ezért 30 darab kritikus sávunk lesz.
 
-Az ITU által megadott BiQuad konstansok 48kHz-es mintavételhez vannak megadva, emiatt a többi mérésnél is azt használjuk az egyszerűség kedvéért.
+Az ITU által megadott BiQuad konstansok 48kHz-es mintavételhez vannak megadva, 
+emiatt a többi mérésnél is azt használjuk az egyszerűség kedvéért.
 Továbbá ezt majd minden forgalomban lévő hangkártya egységesen támogatja.
+
+### Felhasználói felület
+
+A felhasználói felületet négy fő részre lehet bontani. Lehetőséget kell biztosítani a felhasználónak,
+hogy kiválassz a használt bemeneti eszközt egy legördülő listából, valamint beállítsa a mérési intervallum hosszát
+egy csúszkán mely egy tizedmásodperctől egy egész másodpercig terjedhet.
+Ezeket a konfigurációs lehetőségeket össze kell fogni. 
+
+Ezek alatt kel lennie a mérés elindítása és a futó mérés leállítására való gombnak.
+A gomb megjelenítésének tükröznie kell az állapotát,azaz annak hogy éppen fut-e mérés vagy sem.
+
+Közvetlenül a gomb alatt kell szemléltetni az éppen futó mérések eredményét.
+Az eredménynek számszerűleg és vizuálisan jelezni kell a felhasználó felé egy úgynevezett progress bar segítségével.
+A különböző mérések egymás alatt helyezkednek el.
+
+Legalul az alkalmazás írja ki az éppen aktuális állapotát. 
+A program állapotától függően legyenek a felhasználói felület más részei aktívak vagy sem.
+Ha egy rész nem aktív az vizuálisan jelezni kell és az alkalmazásnak meg kell tiltania az interakciót a felhasználóval.
 
