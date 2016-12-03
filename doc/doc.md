@@ -293,7 +293,7 @@ A racionális számok egy egyszerű és hatékony megvalósítása a fixpontos s
 A fixpontos szám valamilyen skálázás után egész számként van ábrázolva a memóriában.
 A skálázás mértéke függ az architcechtúrától, és általában kettőnek valamely hatványa.
 
-Legyen $Q(m,n) \doteq \{ \frac{k}{2^n} | k \in \mathbb{Z}, k \in [-2^n,2^n-1 ] \}$ az előjeles, $n+m+1$ biten ábrázolt fixpontos számok halmaza.
+Legyen $Q(m,n) \doteq \{ \frac{k}{2^n} | k \in \mathbb{Z}, k \in [-2^m,2^m-1 ] \}$ az előjeles, $n+m+1$ biten ábrázolt fixpontos számok halmaza.
 Ekkor egy $q \in Q(m,n)$-nak megfelelő egész szám a memóriában a $\hat{q} = [2^nq] \in [-2^{n+m},2^{n+m-1}-1]$, ahol $[.]$ az egészrész függvény.
 
 Ha $a,b \in Q(m,n)$, akkor
@@ -674,4 +674,68 @@ A különböző mérések egymás alatt helyezkednek el.
 Legalul az alkalmazás írja ki az éppen aktuális állapotát. 
 A program állapotától függően legyenek a felhasználói felület más részei aktívak vagy sem.
 Ha egy rész nem aktív az vizuálisan jelezni kell és az alkalmazásnak meg kell tiltania az interakciót a felhasználóval.
+
+## Megvalósítás
+
+### Fixpontos aritmetika
+
+A példányosítás közben elvégzendő, fordítási idejű ellenőrzéseket az úgynevezett SFINAE (subsitution failure is not an error)
+C++-ban használt módszerrel éri el a sablon osztály. Két ellenőrzés hajtódik végre.
+Egyrészt a reprezentációhoz használt típus ténylegesen egész szám-e (`std::is_integral<Int>`), illetve az egész-,
+valamint a törtrészt elválasztó fixpont helye megfelel-e a választott egész számnak: `Q <= 8*sizeof(Int)` .
+Ezeket az ellenőrzéseket a felhasználótól elrejtett sablon paraméter formájaban tesszük meg `std::enable_if_t` segítségével.
+
+Hasonlóan járunk el a a konstruktorok, illetve a konverziós operátorok esetén. 
+Egy `Float` típusról a `std::is_floating_point<Float>` segítségével állapítjuk meg, hogy ténylegesen lebegőpontos-e.
+
+Ahhoz, hogy egy egész számot fixpontos számmá konvertáljunk, egyszerűen meg kell hogy szorozzuk $2^Q$-val,
+ami a legtöbb architekúrán megvalósítható egy bitreprezentáció balra tologatásával. 
+A visszaalakítás tulajdonképpen egy egész osztás az előző konstanssal, ami jobbra tologatással ekvivalens.
+Lebegőpontos számoknál is hasonlóan kapjunk a konverziókat, de ott már lebegőpontos osztást és szorzást végzünk.
+
+A megvalósításnal a kód újrafelhasználsa fontos szempont, ezért azoknál az operátoroknak ahol ugyanazt a műveletet hajtuk végre,
+ott az egyik megvalósítása a másik meghívását jelenti, példaul a `+` műveletet a `+=` operátor segítségével hajtjuk végre.
+
+A legtöbb operátornál a reprezentációhoz használt egész típus műveletei elvégzik a feladatot fixpontos számok esetén is.
+Ez igaz a negálás, összadás, kivonás, kisebb-mint, egyenlóség, egésszel való szoryás, illetve osztás operátorokra.
+Fixpontos szorzás és osztás esetén szükségunk van még bit tologatás műveletekre is.
+A többi logikai művelet a többi meghívsával kerül megvalósításra:
+
+- $a \neq b \doteq \neg (a = b)$,
+- $a \le b \doteq a < b \vee a = b$,
+- $a > b \doteq \neg (a \le b)$,
+- $a \ge b \doteq \neg (a < b)$.
+
+Mivel $\log_b a = \frac{\log_c a}{\log_c b}$, ezért az algorimus ami logaritmust számol elég ha egy kiválasztott $b$ érétkre működik.
+A jelfeldolgozásban használatos decibel skála miatt a $b=10$ természetes választás lenne,
+azonban a jelengi számítógépes architectúrák hatékonyabb lehetőségeket biztosítanak $b=2$ esetén.
+
+Ha $y = \log_2 x$, akkor természetesen $x = 2^y$. Normalizálás, azaz kettővel való osztások vagy sorzások,
+melyek természetsesen bittologatások, során elérjük hogy $1 \le x < 2$, valamint megkapjuk $y$ egész részét is.
+Néhány architechtúrán lehetőség van megszámolni a 0-k számát az első 1-ig binrási formában, ami tovább egyszerűsíti a normalizását.
+
+Ha $1 \le x < 2$, akkor $0 \le y < 1$. $y$ 2-adikus tört ábrázolására áttérve kapjuk, hogy $y = \sum{y_i2^{-i}}$, amit átrendezés után
+
+$$y = 2^{-1}(y_1 + 2^{-1}(y_2 + 2^{-1}(y_3 + \dots))).$$
+
+Ahonnan kapjuk, hogy
+
+$$x = 2^{2^{-1}(y_1 + 2^{-1}(y_2 + 2^{-1}(y_3 + \dots)))}.$$
+
+Az algoritmus lépései a következőek:
+
+1. $x$ négyzetre emelésevel kapjuk, hogy
+
+$$x^2 = 2^{y_1}2^{2^{-1}(y_2 + 2^{-1}(y_3 + 2^{-1}(y_4 + \dots)))}.$$
+
+Ha $y_1 = 0$, akkor
+
+$$x^2 = 2^{2^{-1}(y_2 + 2^{-1}(y_3 + 2^{-1}(y_4 + \dots)))},$$
+
+különben
+
+$$x^2 = 2 \cdot 2^{2^{-1}(y_2 + 2^{-1}(y_3 + 2^{-1}(y_4 + \dots)))}.$$
+
+2. Ha $x^2 > 2$, akkor $x_1$ mantissza bit 1 és legyen elvégezzük az első lépést $\frac{x^2}{2}$-re, különben 0 és $x^2$-re végezzük el.
+Addig ismételjük a lépéseket amíg el nem érjük a kívánt pontosságot.
 
