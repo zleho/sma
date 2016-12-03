@@ -689,30 +689,30 @@ Hasonlóan járunk el a a konstruktorok, illetve a konverziós operátorok eset�
 Egy `Float` típusról a `std::is_floating_point<Float>` segítségével állapítjuk meg, hogy ténylegesen lebegőpontos-e.
 
 Ahhoz, hogy egy egész számot fixpontos számmá konvertáljunk, egyszerűen meg kell hogy szorozzuk $2^Q$-val,
-ami a legtöbb architekúrán megvalósítható egy bitreprezentáció balra tologatásával. 
+ami a legtöbb architcechtúrán megvalósítható egy bit-reprezentáció balra tologatásával. 
 A visszaalakítás tulajdonképpen egy egész osztás az előző konstanssal, ami jobbra tologatással ekvivalens.
 Lebegőpontos számoknál is hasonlóan kapjunk a konverziókat, de ott már lebegőpontos osztást és szorzást végzünk.
 
-A megvalósításnal a kód újrafelhasználsa fontos szempont, ezért azoknál az operátoroknak ahol ugyanazt a műveletet hajtuk végre,
-ott az egyik megvalósítása a másik meghívását jelenti, példaul a `+` műveletet a `+=` operátor segítségével hajtjuk végre.
+A megvalósításnál a kód újra felhasználása fontos szempont, ezért azoknál az operátoroknak ahol ugyanazt a műveletet hajtjuk végre,
+ott az egyik megvalósítása a másik meghívását jelenti, például a `+` műveletet a `+=` operátor segítségével hajtjuk végre.
 
 A legtöbb operátornál a reprezentációhoz használt egész típus műveletei elvégzik a feladatot fixpontos számok esetén is.
-Ez igaz a negálás, összadás, kivonás, kisebb-mint, egyenlóség, egésszel való szoryás, illetve osztás operátorokra.
-Fixpontos szorzás és osztás esetén szükségunk van még bit tologatás műveletekre is.
-A többi logikai művelet a többi meghívsával kerül megvalósításra:
+Ez igaz a negálás, összeadás, kivonás, kisebb-mint, egyenlőség, egésszel való szorzás, illetve osztás operátorokra.
+Fixpontos szorzás és osztás esetén szükségünk van még bit tologatás műveletekre is.
+A többi logikai művelet a többi meghívásával kerül megvalósításra:
 
 - $a \neq b \doteq \neg (a = b)$,
 - $a \le b \doteq a < b \vee a = b$,
 - $a > b \doteq \neg (a \le b)$,
 - $a \ge b \doteq \neg (a < b)$.
 
-Mivel $\log_b a = \frac{\log_c a}{\log_c b}$, ezért az algorimus ami logaritmust számol elég ha egy kiválasztott $b$ érétkre működik.
+Mivel $\log_b a = \frac{\log_c a}{\log_c b}$, ezért az algoritmus ami logaritmust számol elég ha egy kiválasztott $b$ értékre működik.
 A jelfeldolgozásban használatos decibel skála miatt a $b=10$ természetes választás lenne,
-azonban a jelengi számítógépes architectúrák hatékonyabb lehetőségeket biztosítanak $b=2$ esetén.
+azonban a jelenlegi számítógépes architcechtúrák hatékonyabb lehetőségeket biztosítanak $b=2$ esetén.
 
-Ha $y = \log_2 x$, akkor természetesen $x = 2^y$. Normalizálás, azaz kettővel való osztások vagy sorzások,
-melyek természetsesen bittologatások, során elérjük hogy $1 \le x < 2$, valamint megkapjuk $y$ egész részét is.
-Néhány architechtúrán lehetőség van megszámolni a 0-k számát az első 1-ig binrási formában, ami tovább egyszerűsíti a normalizását.
+Ha $y = \log_2 x$, akkor természetesen $x = 2^y$. Normalizálás, azaz kettővel való osztások vagy szorzások,
+melyek természetesen bittologatások, során elérjük hogy $1 \le x < 2$, valamint megkapjuk $y$ egész részét is.
+Néhány architcechtúrán lehetőség van megszámolni a 0-k számát az első 1-ig bináris formában, ami tovább egyszerűsíti a normalizálást.
 
 Ha $1 \le x < 2$, akkor $0 \le y < 1$. $y$ 2-adikus tört ábrázolására áttérve kapjuk, hogy $y = \sum{y_i2^{-i}}$, amit átrendezés után
 
@@ -724,7 +724,7 @@ $$x = 2^{2^{-1}(y_1 + 2^{-1}(y_2 + 2^{-1}(y_3 + \dots)))}.$$
 
 Az algoritmus lépései a következőek:
 
-1. $x$ négyzetre emelésevel kapjuk, hogy
+1. $x$ négyzetre emelésével kapjuk, hogy
 
 $$x^2 = 2^{y_1}2^{2^{-1}(y_2 + 2^{-1}(y_3 + 2^{-1}(y_4 + \dots)))}.$$
 
@@ -738,4 +738,92 @@ $$x^2 = 2 \cdot 2^{2^{-1}(y_2 + 2^{-1}(y_3 + 2^{-1}(y_4 + \dots)))}.$$
 
 2. Ha $x^2 > 2$, akkor $x_1$ mantissza bit 1 és legyen elvégezzük az első lépést $\frac{x^2}{2}$-re, különben 0 és $x^2$-re végezzük el.
 Addig ismételjük a lépéseket amíg el nem érjük a kívánt pontosságot.
+
+### Digitális szűrők
+
+A BiQuad-ok megvalósítására a Direct Form II képletet választjuk, mert az egyaránt jól működik fixpontot és lebegőpontos számok esetén.
+A megvalósított képlet:
+
+$$y_n = b_0w_n + b_1w_{n-1} + b_2w_{n-2},$$
+
+ahol
+
+$$w_n = x_n - a_1w{n-1} -a_2w{n-2}.$$
+
+A konstansok beállítása a konstruktor feladat.
+
+Ha $n=0$, akkor $w_{-1} = w_{-2} = 0$ a választott kezdeti értékek. A kezdeti értékeket az `init()` metódus állítja be, illetve vissza.
+
+Az éppen aktuális $y_n$ kiszámítása a függvényhívás operator feladata.
+
+Az osztály állapotát a $w_{n-1}$, illetve $w_{n-2}$ aktuális érteke adja ki.
+
+<!-- TODO: lowpass, highpass, bandpass -->
+
+### Mérések
+
+Minden, az alkalmazás által elvégzendő mérés alapja a RMS kalukáció, azaz
+$$20\log_{10}\frac{\sqrt{\sum_{i=1}^{N} \frac{x_i^2}{N}}}{2^{-Q}}.$$
+
+A képlet felbontható
+
+$$20\log_{10}\sqrt{\sum_{i=1}^{N} \frac{x_i^2}{N}} - 20\log_{10}2^{-Q},$$
+
+ahonnan kapjuk, hogy
+
+$$20\log_{10}\sqrt{\sum_{i=1}^{N} \frac{x_i^2}{N}} + 20Q\log_{10}2.$$
+
+Legyen $C_Q = 20Q\log_{10}2$. Az összeg első fele tovább alakítható:
+
+$$10\log_{10}\sum_{i=1}^{N} \frac{x_i^2}{N},$$
+
+Tovább bontva kapjuk, hogy
+
+$$10\log_{10}\sum_{i=1}^{N}{x_i^2} + 10\log_{10}N.$$
+
+Legyen $C_N = 10\log_{10}N$. Logaritmus alapját kettőre valtoztatva:
+
+$$\frac{10}{\log_2 10}\log_{2}\sum_{i=1}^{N}{x_i^2}.$$
+
+Legyen $C = \frac{10}{\log_2 10}$. Ekkor az egész számítás a következőre egyszerűsödik:
+
+$$C_Q + C_N + C\log_{2}\sum_{i=1}^{N}{x_i^2}.$$
+
+Az `RMSdB` osztály sablon a fenti képletet valósítja meg. A `step()` függvény minden lépésben kiszámolja a bemenet négyzetét,
+majd hozzáadja azt a számon tartott négyzetösszeg részlethez, valamint növel egy számlálót,
+aminek segítségével nyílván tartja, hogy hol jár a periódusban. Ha a számláló a mérési intervallum végét jelzi,
+akkor a végső képlet alapján kiszámolja az RMS-t. A konstansok kiszámítása az objektum létrehozásánál történik meg,
+nem visz el futási időt a mérés elvégzése közben. Ha `step()` ad vissza új mérési értéket, akkor visszaállítja kezdeti állapotát az
+`init()` függvény meghívásával.
+
+A K súlyozás esetünkben azt jelenti, hogy a bementi jelet áteresztünk két BiQuad-on egymás után.
+Az két BiQuad paraméterei a táblázatokban találhatóak és 48kHz-es mintavételi frekvenciára vonatkoznak.
+
++-------+---------------------+-------+---------------------+
+|       |                     | $b_0$ |  $1.53512485958697$ |
++-------+---------------------+-------+---------------------+
+| $a_1$ | $-1.69065929318241$ | $b_1$ | $-2.69169618940638$ |
++-------+---------------------+-------+---------------------+
+| $a_2$ |  $0.73248077421585$ | $b_2$ |  $1.19839281085285$ |
++-------+---------------------+-------+---------------------+
+
+: Az első fázis együtthatói
+
++-------+---------------------+-------+------+
+|       |                     | $b_0$ |  $1$ |
++-------+---------------------+-------+------+
+| $a_1$ | $-1.99004745483398$ | $b_1$ | $-2$ |
++-------+---------------------+-------+------+
+| $a_2$ |  $0.99007225036625$ | $b_2$ |  $1$ |
++-------+---------------------+-------+------+
+
+: Az második fázis együtthatói
+
+Az `ITUBS1770` osztály `init()` függvényének feladata a két fázisnak megfelelő osztályok ugyanazon nevű függvényének meghívása.
+A `step()` függvény először alkalmazza a két fázist a bemeneti értékre, majd meghívja 
+az `RMSdB` egy példányának ugyanazon nevű függvényét szintén. Ha ez a hívás jelzi a mérési periódus végét,
+akkor meghívódik az `init()` függvény. Az osztály konstruktora hozza létre a két fázisnak megfelelő BiQuad-okat.
+
+<!-- TODO: AWeighting -->
+
 
