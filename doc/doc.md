@@ -16,6 +16,7 @@ header-includes:
     - \usepackage{setspace}
     - \onehalfspacing
 ---
+
 # Bevezetés
 
 ## Motiváció
@@ -758,7 +759,38 @@ Az éppen aktuális $y_n$ kiszámítása a függvényhívás operator feladata.
 
 Az osztály állapotát a $w_{n-1}$, illetve $w_{n-2}$ aktuális érteke adja ki.
 
-<!-- TODO: lowpass, highpass, bandpass -->
+A low-pass szűrőket megvalósító `LowPass` osztályt a `BiQuad` osztály sablonból kapjuk származtatás útján.
+A konstruktor feladata a BiQuad konstansok beállítása a bemeneti paraméterek:
+
+- $F_c$, az úgynevezett cut-off frekvencia, ami felett a szűrő nem enged át jelet,
+- $F_s$, a mintavétel frekvenciája, valamint
+- a használt $Q$ konstans.
+
+A low-pass BiQuad paramétereket az alábbi képletek alapján számoljuk.
+Legyen $K = \tan \frac{\omega T}{2}$ és $\omega T = 2 \pi \frac{F_c}{F_s}$, ekkor
+
+$$b_0 = \frac{K^2}{K^2 + \frac{K}{Q} + 1}, b_1 = 2b_0, b_2 = b_0,$$
+
+valamint
+
+$$a_1 = \frac{2(K^2-1)}{K^2 + \frac{K}{Q} + 1}, a_2 = \frac{K^2 - \frac{K}{Q} + 1}{K^2 + \frac{K}{Q} + 1}.$$
+
+A high-pass szűrők hasonló elven alapulnak. A használt konstansok:
+
+$$b_0 = \frac{1}{1+\frac{K}{Q} + K^2}, b_1 = -2b_0, b_2 = b_0,$$
+
+valamint
+
+$$a_1 = 2\frac{K^2 -1}{1+\frac{K}{Q} + K^2}, a_2 = \frac{1- \frac{K}{Q} + K^2}{1+\frac{K}{Q} + K^2}.$$
+
+A band-pass szűrőket egy low-pass és egy high-pass szűrő egymás utáni alkalmazásával kapjuk.
+A konstruktor bemeneti paraméterei a sáv közép-frekvenciája, valamint a sávszélesség, valamint a választott Q konstans.
+Ha a sáv közép-frekvenciája $F_c$, a sávszélesség pedig $d$, akkor
+
+- a low-pass szűrő cut-off frekvenciája $F_c + \frac{d}{2}$, valamint
+- a high-pass szűrő cut-off frekvenciája $F_c - \frac{d}{2}$.
+
+A `BandPass` osztály `init()` függvényének feladata a két szűrőnek megfelelő objektum `init()` metódusának meghívása.
 
 ### Mérések
 
@@ -824,6 +856,31 @@ A `step()` függvény először alkalmazza a két fázist a bemeneti értékre, 
 az `RMSdB` egy példányának ugyanazon nevű függvényét szintén. Ha ez a hívás jelzi a mérési periódus végét,
 akkor meghívódik az `init()` függvény. Az osztály konstruktora hozza létre a két fázisnak megfelelő BiQuad-okat.
 
-<!-- TODO: AWeighting -->
+Az `AWeighted` osztály esetén a konstruktor feladata a `BandPass` objektumok létrehozása,
+valamint a nekik megfelelő
 
+$$A(f)=\frac{12200^4 \cdot f^4}{(f^2 + 20.6^2) \sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)} (f^2 + 12200^2)}$$
+
+értékek kiszámítása. Mindkettő esetén szükség van a harmadoktávok közép-frekvenciájának kiszámítására,
+melyet két egymásba ágyazott ciklus segítségével könnyedén megtehetünk. A külső ciklus végig iterál az emberi fül
+számára felfogható oktávokon, 20Hz-től kezdve duplázva a frekvenciát egészen 20480Hz-ig.
+A belső ciklusban feladata a harmadoktávokon való végigiterálás. Ehhez oktáv sávszélességét három felé osztjuk.
+A legbelső ciklusmagban kiszámítjuk a harmadoktáv közép-frekvenciáját valamint a közép-frekvenciának megfelelő súlyt.
+Továbbá a konstruktor felkészíti a tárolt `RMSdb` példányt a munkára azzal, hogy átadja neki a mérési intervallum hosszát.
+
+A `step()` függvény egy lépésében, először felbontja a jelet harmadoktávokra, azaz keresztül ereszti az összes szűrőn,
+majd az adott kritikus sávnak megfelelő súllyal összegzi azokat majd erre végrehajtja `RMSdB` egy példányának ugyanazon nevű függvényét.
+Ha ez a függvény a mérési periódus végét jelzi, akkor minden band-pass szűrőn meghívódik az `init()` függvény.
+
+### Felhasználói felület
+
+A `Config` osztály feladata a konfigurációs lehetőségek logikai és vizuális összefogása.
+A logikai összevonás tulajdonképpen tartalmazás, a vizuális pedig származtatás a gtkmm `Gtk::Frame` osztályából.
+Mivel `Gtk::Frame`-nek mindössze egy eleme lehet, ezért szükség van még egy közbenső `Gtk::VBox` példányra, melynek feladata,
+hogy egymás alá helyezze a beállítható elemeket: 
+
+- egy legördülő listát, azaz `Gtk::ComboBoxText`-t tartalmazó `Gtk::Frame`,
+az elérhető bemeneti eszközök listájával aminek feltöltése az `Application` osztály feladata, valamint
+- egy csúszkát (`Gtk::Scale`) tartalmazó `Gtk::Frame`, melyen a mérési intervallum hosszát állíthatja be a felhasználó.
+A csúszkán az egymás melletti értékek között 0.1s a különbség, minimum értéke 0.1, maximum pedig 1s.
 
