@@ -884,3 +884,45 @@ az elérhető bemeneti eszközök listájával aminek feltöltése az `Applicati
 - egy csúszkát (`Gtk::Scale`) tartalmazó `Gtk::Frame`, melyen a mérési intervallum hosszát állíthatja be a felhasználó.
 A csúszkán az egymás melletti értékek között 0.1s a különbség, minimum értéke 0.1, maximum pedig 1s.
 
+A `Measurement` osztály sablon a sablon paraméterként kapott mérés elvégzésért, valamint az aktuális eredmény megjelenítésért felelős.
+Az osztály származtatás útján öröklődik `Gtk::Frame` osztályból, melynek címkéje az aktuális mérést tükrözi és konstruktor paraméter.
+A mérési eredmény grafikus megjelenítésért egy tartalmazott `Gtk::ProgressBar` példány felelős.
+`Gtk::ProgressBar` általában valamilyen arányszámot szemléltet 0 és 1 között, de mindkét érték változtatható.
+A mi esetünkben a maximális érték a mérés maximális értéke, melyet a `max()` osztály-statikus függvény segítségével kapunk, 
+ami jelentősen függ a használt fixpontos ábrázolástól. Ha $Q=16$, akkor `max()` által visszaadott érték $20Q\log_{10}2$.
+A mérést magát a `measure()` függvény végzi a mérés objektum `step()` függvénye segítségével. Ha egy mérési periódus végére értünk,
+akkor `measure()` új értéket ad a `Gtk::ProgressBar` objektumnak.
+
+A különböző méréseket a `Measurements` osztály sablon fogja egybe egy `Gtk::VBox` segítségével,
+ami sablon paramétereiként megkapja az összes elvégzendő mérésnek megfelelő osztályt,
+majd mindegyikből példányosít egy `Measurement` osztályt és ezen osztályok egy-egy példányát egy `std::tuple<Measurement...>` objektum
+tartalmazza. Az osztály `measure()` metódusánka feladata az összes tárolt mérésnek megfelelő objektum ugyanazon nevű függvényének meghívása.
+
+A `Gtk::Window`-ból szármattatott `Application` osztály feladata többlétű.
+Egyrészt tartalmaz egy `PulseAudio` esemény ciklust, és futtatja azt amikor nincs más dolga (idle-time),
+másrészt feldolgozza az úgynevezett callback függvények eredményét. Jelenleg az alábbi függvényhívások eredménye érdekes számunkra:
+
+- a program indításánál csatlakozás a lokális `PulseAudio` szerverhez,
+- a bementi eszközök listájának elkérése, melyeket konfigurációs állpotban állíthatunk,
+- a mérés megkezdésekor csatlakozás a bementi eszközhöz,
+- a mérés közben a a bementi jel feldolgozása, valamint
+- buffer tólcsordulás kezelése.
+
+Az osztály fogja össze a képernyőn megjelenő különböző részeket, azaz a `Config` osztály egy példányát,
+egy `Gtk::ToggleButton`-t mellyel a mérést indíthatja, illetve állíthatja le a felhasználó, a `Measurements` sablont példányosítva a mérésekkel,
+valamint egy `Gtk::StatusBar`-t, ahol az applikáció jelenlegi állapotát tartjuk számon, illetve mérés közben jelzi a túlcsordulások számát.
+
+Az applikáció állapotától függően a felhasználói felület egyes részei inaktívak lehetnek:
+
+- kezdeti állapotban, valamint amikor a program lekéri a bementi eszközök listáját, akkor semmi sem aktív
+- konfigurációs állapotban aktív a konfigurációs felület és a mérést indító gomb,
+- a bementi eszközhöz csatlakozás közben semmi sem aktív,
+- mérések elvégzése közben csak a mérést leállító gomb, valamint a méréseket jelző felület aktív.
+
+Indulás után közvetlen a program kezdeti állapotban van, 
+majd miután csatlakozott `PulseAudio`-hoz lekéri a bementi eszközök listáját és átmegy az annak megfelelő állapotba.
+Ha megérkezett a bementi eszközök listája a program átmegy konfigurációs állapotba amíg a felhasználó mg nem nyomja a mérést indító gombot.
+Ekkor a program csatlakozik a bementi eszközhöz és ha ez sikeres átkerül a mérés állapotba,
+ahol addig marad amíg a felhasználó be nem fejezi a mérést a gombra kattintással. Ezek után a program visszmegy a bementi eszközök listáját elkérő állapotba.
+Az állapotátmetekért a felhasználói feület alkításáért a `setStatus()` metódus felel.
+
