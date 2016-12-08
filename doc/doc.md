@@ -979,4 +979,40 @@ Ennek automatikus analíziséhez a következő módszert alkalmazzunk:
 5. A visszaalakított számból újra fixpontos számot képzünk.
 6. A két fixpontos számnak meg kell egyeznie.
 
+A kettes alapú logaritmus számításnál a szabványos C programkönyvtár `log` függvény által számolt eredményhez hasonlítjuk a számolt eredményt.
+További függvények megvalósításánál hasonlóan járunk el a jövőben.
+
+### Digitális szűrők
+
+A biquad implementáció teszteléséhez szükségünk van egy referencia megvalósításhoz. Az nyílt forrású MATLAB klón,
+az Octave szoftver csomag rendelkezik a szükséges tulajdonságokkal, hiszen beépített funkció a programkönyvtár által megvalósított Direct Form II.
+
+A tesztelés menete a következő:
+
+1. Véletlenszerű bemeneti jelsorozatot generálunk. Ezt a bemeneti jelet elmentjük, mint referencia input.
+2. A jelsorozat keresztül engedjük az Octave megfelelő implementációján.
+3. A kimeneti jelet elmentjük, mint referencia futás outputja.
+4. Az elmentett bemeneti jelet keresztül engedjük a saját megvalósításon.
+5. A referencia és a számolt kimenetet összehasonlítjuk.
+
+A fentieket végrehajtjuk lebegőpontos és fixpontos számábrázolás mellett is.
+
+A low-pass, illetve a high-pass szűrők esetén kétféle generált jelre van szükségünk:
+
+- egy olyan amit a szűrő átereszt, azaz a cut-off frekvencia alatt, illetve felett van, valamint
+- egy olyan amit nem.
+
+A band-pass szűrők esetére három tartományból generálunk jelet:
+
+- a sávszélesség alatti jel,
+- a tartomány feletti jel, valamint
+- a két frekvencia határ közé eső jel.
+
+Minden esetben a generált jelent egyszerűen képezhetjük az alábbi függvénnyel. Legyen $f$ a generált jel frekvenciája $N$ az egy periódusba eső jelek száma,
+ekkor a $k$-ik generált jel:
+
+$$\sin \frac{2\pi kf}{N}.$$
+
+Az eredmény ellenőrzésénél az ellenőrizzük, hogy a kimeneti jel energiája nulla-e. Ha igen, akkor a szűrő megszűrte a generált jelet, egyébként nem.
+A jel energiáját a $\sum_{i=0}^N \frac{x_i^2}{N}$ képlettel kapjuk meg.
 
