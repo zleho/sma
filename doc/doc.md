@@ -5,6 +5,8 @@ vim: spell:spelllang=hu
 papersize: a4
 lang: hu-HU
 toc: true
+lof: true
+lot: true
 fontsize: 12pt
 margin-left: 3.5cm
 margin-top: 2.5cm
@@ -889,24 +891,24 @@ Az osztály származtatás útján öröklődik `Gtk::Frame` osztályból, melyn
 A mérési eredmény grafikus megjelenítésért egy tartalmazott `Gtk::ProgressBar` példány felelős.
 `Gtk::ProgressBar` általában valamilyen arányszámot szemléltet 0 és 1 között, de mindkét érték változtatható.
 A mi esetünkben a maximális érték a mérés maximális értéke, melyet a `max()` osztály-statikus függvény segítségével kapunk, 
-ami jelentősen függ a használt fixpontos ábrázolástól. Ha $Q=16$, akkor `max()` által visszaadott érték $20Q\log_{10}2$.
+ami jelentősen függ a használt fixpontos ábrázolástól. Ha $Q=16$, akkor `max()` által visszaadott érték $20Q\lg 2$.
 A mérést magát a `measure()` függvény végzi a mérés objektum `step()` függvénye segítségével. Ha egy mérési periódus végére értünk,
 akkor `measure()` új értéket ad a `Gtk::ProgressBar` objektumnak.
 
 A különböző méréseket a `Measurements` osztály sablon fogja egybe egy `Gtk::VBox` segítségével,
 ami sablon paramétereiként megkapja az összes elvégzendő mérésnek megfelelő osztályt,
 majd mindegyikből példányosít egy `Measurement` osztályt és ezen osztályok egy-egy példányát egy `std::tuple<Measurement...>` objektum
-tartalmazza. Az osztály `measure()` metódusánka feladata az összes tárolt mérésnek megfelelő objektum ugyanazon nevű függvényének meghívása.
+tartalmazza. Az osztály `measure()` metódusának feladata az összes tárolt mérésnek megfelelő objektum ugyanazon nevű függvényének meghívása.
 
-A `Gtk::Window`-ból szármattatott `Application` osztály feladata többlétű.
+A `Gtk::Window`-ból származtatott `Application` osztály feladata többlétű.
 Egyrészt tartalmaz egy `PulseAudio` esemény ciklust, és futtatja azt amikor nincs más dolga (idle-time),
 másrészt feldolgozza az úgynevezett callback függvények eredményét. Jelenleg az alábbi függvényhívások eredménye érdekes számunkra:
 
 - a program indításánál csatlakozás a lokális `PulseAudio` szerverhez,
-- a bementi eszközök listájának elkérése, melyeket konfigurációs állpotban állíthatunk,
+- a bementi eszközök listájának elkérése, melyeket konfigurációs állapotban állíthatunk,
 - a mérés megkezdésekor csatlakozás a bementi eszközhöz,
 - a mérés közben a a bementi jel feldolgozása, valamint
-- buffer tólcsordulás kezelése.
+- buffer túlcsordulás kezelése.
 
 Az osztály fogja össze a képernyőn megjelenő különböző részeket, azaz a `Config` osztály egy példányát,
 egy `Gtk::ToggleButton`-t mellyel a mérést indíthatja, illetve állíthatja le a felhasználó, a `Measurements` sablont példányosítva a mérésekkel,
@@ -923,6 +925,58 @@ Indulás után közvetlen a program kezdeti állapotban van,
 majd miután csatlakozott `PulseAudio`-hoz lekéri a bementi eszközök listáját és átmegy az annak megfelelő állapotba.
 Ha megérkezett a bementi eszközök listája a program átmegy konfigurációs állapotba amíg a felhasználó mg nem nyomja a mérést indító gombot.
 Ekkor a program csatlakozik a bementi eszközhöz és ha ez sikeres átkerül a mérés állapotba,
-ahol addig marad amíg a felhasználó be nem fejezi a mérést a gombra kattintással. Ezek után a program visszmegy a bementi eszközök listáját elkérő állapotba.
-Az állapotátmetekért a felhasználói feület alkításáért a `setStatus()` metódus felel.
+ahol addig marad amíg a felhasználó be nem fejezi a mérést a gombra kattintással. Ezek után a program visszamegy a bementi eszközök listáját elkérő állapotba.
+Az állapot átmenetekért a felhasználói felület alakításáért a `setStatus()` metódus felel.
+
+## Tesztelés
+
+A tesztelés során fontos szempont, hogy a tesztesetek futtatása és az eredmények elvégzése automatikus legyen.
+Erre azért van szükség, hogy a későbbi módosítások során ne okozzunk regressziót,
+azaz ne rontsunk el a már működő részeit az alkalmazásnak, illetve a programkönyvtárnak. 
+
+Fontos követelmény, hogy az automatikus tesztek kellően gyorsan fussanak, hiszen a minél gyorsabb visszajelzés
+a módosításokról megkönnyíti a fejlesztés menetét. Ha az automatikus tesztek lassan futnak,
+akkor kevésbe frekventáltan futtatják őket fejlesztés közben a fejlesztők.
+
+Törekedni kell arra, hogy mérhető legyen a letesztelt funkciók mennyisége.
+Ehhez egy jó kiindulási alap annak a mérése, hogy a tesztelés során milyen kódsorokon futunk keresztül.
+Ezt százalékos formában szokás közölni.
+
+### Statikus kódanalízis
+
+A legkönnyebben ellenőrizhető hibák közé tartoznak azok melyeket még fordítási időben ellenőrizhetünk.
+Ezért fordításnál a fordítóban bekapcsoljuk az összes lehetséges figyelmeztetést, és minden figyelmeztetést fordítási hibának tekintünk.
+Ha úgy véljük, hogy az adott helyen az adott figyelmeztetés nem jelent hibát, akkor és csak azon a helyen elnyomjuk a figyelmeztetés jelentését.
+
+Lehetőség szerint forráskódot további statikus analízisnek vetjük alá és ha kell akkor ehhez a használt fordítón kívül egyéb szoftvereket is felhasználunk.
+
+### Futtatási idejű kódanalízis
+
+A tesztesetek futtatása közben, futtatási idejű analízisnek vetjük alá az alkalmazást,
+melyeket alapból nem végez el a futtatási környezet rendszerszerű használat közben. Ezek növelik a futási időt,
+amit a valós idejű követelmények miatt nem engedhetünk meg magunknak.
+
+Ez a lépés többek között a biztonság kritikus hibák felderítésében segít. A teljesség igénye nélkül, a fázis a következő dolgokat ellenőrzi:
+
+- felszabadítjuk-e az összes felfoglalt memóriát,
+- buffer túl-, illetve alul csordulás,
+- a függvény hívási verem helyes használata.
+
+### Fixpontos aritmetika
+
+A fixpontos számokon elvégzett aritmetikai műveletek tesztelését a lebegőpontos számok segítségével tehetjük meg.
+Először a lebegőpontos számokat át alakítjuk fixpontos számokká, majd elvégezzük a műveleteket mindkét ábrázolás segítségével.
+Az eredményt vissza alakítjuk lebegőpontos számmá, majd összehasonlítjuk a lebegőpontos számokon elvégzett, ugyanazon művelet eredményével.
+Természetesen figyelembe kell vennünk, hogy a két reprezentáció nem ugyanolyan pontossággal dolgozik.
+
+A fentiekhez azonban először meg kell bizonyosodnunk, hogy a lebegőpontos és fixpontos ábrázolás közötti konverziók jól működnek.
+Ennek automatikus analíziséhez a következő módszert alkalmazzunk:
+
+1. Veszünk véletlenszerűen egy lebegőpontos számot a fixpontos ábrázolás tartományából.
+2. Fixpontos számmá alakítjuk.
+3. Visszaalakítjuk lebegőpontos számma.
+4. Összehasonlítjuk a két lebegőpontos számot. Meg kell győződnünk róla, hogy nem térnek el többel, mint amit a fixpontos ábrázolás hibaként behoz.
+5. A visszaalakított számból újra fixpontos számot képzünk.
+6. A két fixpontos számnak meg kell egyeznie.
+
 
