@@ -1016,3 +1016,38 @@ $$\sin \frac{2\pi kf}{N}.$$
 Az eredmény ellenőrzésénél az ellenőrizzük, hogy a kimeneti jel energiája nulla-e. Ha igen, akkor a szűrő megszűrte a generált jelet, egyébként nem.
 A jel energiáját a $\sum_{i=0}^N \frac{x_i^2}{N}$ képlettel kapjuk meg.
 
+### Mérések
+
+A **root-mean-square** számítás tesztelésénél is olyan bemeneti értékeket kell keresnünk, melyekre meg tudjuk mondani,
+hogy milyen kimeneti értéket várunk a számítás végén. Elég egy darab mérési periódusra elvégezni a mérést és a várt értékhez hasonítani az a kapott eredményt.
+
+A választott bemenetek és az elvárt eredmények:
+
+- csupa $0$, ilyenkor az elvárt eredmény is $0$,
+- csupa $1$, ilyenkor az elvárt eredmény a maximálisan felvehető érték,
+- $(-1)^n$, ilyenkor a maximálisan felvehető értéket varjuk el,
+- $\sin \frac{2\pi k}{N}$, ilyenkor az elvárt érték az $\pi$ osztva a legkisebb mértékkel.
+
+A többi mérés automatikus tesztelése nem reális követelmény, mert az analízishez nem áll elegendő információ rendelkezésre,
+illetve a generátor lefejlesztése ugyanazon hiba lehetőségeket hozza magával, mint a tesztelendő implementáció.
+
+### Felhasználói felület és bemeneti jel feldolgozása
+
+A program többi része manuális tesztelésnek van alávetve, hiszen a felhasználói felület,
+illetve a hangkártyáról érkező jel feldolgozása nehezen automatizálható. A PulseAudio lehetőséget nyújt úgynevezett monitor eszközök használatára,
+ahol egy kimeneti eszközre küldött jelet kapjuk vissza bementi jelként. Így bementi eszköz nélkül is tesztelhetjük az alkalmazást.
+
+A felhasználói felület tesztelésénél a felület egyes elemeinél leellenőrizzük, hogy megfelelnek-e az eléjük támasztott követelményeknek, azaz
+
+- konfigurációs állapotban megnyomható-e a mérést elindító gomb,
+- konfigurációs állapotban inaktív-e mérés eredményét jelző része az alkalmazásnak, illetve kezdeti értéket mutat-e,
+- mérés közben megnyomható-e mérést leállító gomb,
+- mérés közben inaktív-e a konfigurációs felület,
+- a program minden állapotában a megfelelő állapot üzenet tükröződik-e,
+- minden állapotban hiba nélkül kiléphetünk-e a programból,
+- program jelzi-e a felhasználó felé a fellépő hibaeseteket.
+
+Miután ezekről meggyőződtünk, a felület és a bemeneti jelhez kapcsoló forrás módosítása esetén ezeket a teszt eseteket újra ellenőrizni kell,
+hogy nem-e okozunk regressziót a működésben.
+
+
