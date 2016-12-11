@@ -1050,4 +1050,22 @@ A felhasználói felület tesztelésénél a felület egyes elemeinél leellenő
 Miután ezekről meggyőződtünk, a felület és a bemeneti jelhez kapcsoló forrás módosítása esetén ezeket a teszt eseteket újra ellenőrizni kell,
 hogy nem-e okozunk regressziót a működésben.
 
+## Továbbfejlesztési lehetőségek
+
+Az alkalmazás lehetővé teszi, hogy könnyedén adjunk hozzá új méréseket a rendszerhez. Ehhez több irányban indulhatunk el:
+
+- a K súlyozáshoz hasonlóan egy digitális szűrőn keresztül eresztett bemeneti jelre RMS-t számolunk,
+- az A súlyozáshoz hasonlóan a kritikus sávokra bontott jelet súlyozott összegére számolunk RMS-t,
+- esetleg a fenti kettőt kombináljuk,
+- fentebb fel nem sorol új mérési forma.
+
+További lehetőség, hogy az alkalmazásban beállítható legyen a mintavételi frekvencia,
+ekkor azonban a ITU BS1700 által ajánlott K frekvencia súlyozás az eredeti formájában nem használható,
+hiszen a használt biquad konstansok 48kHz-re vonatkoznak.
+
+A programkönyvtár esetében lehetőség van több matematikai függvény fixpontos megvalósítására.
+Jelenleg csak a kettes alapú logaritmus függvény van használatban a kód többi részében, ezért csak az került megvalósításra.
+
+A band-pass, low-pass, illetve high-pass digitális szűrőkön felül, további biquad alapú szűrők hozzáadásával lehet erősíteni a programkönyvtárat,
+illetve lehetőség van nem biquad alapú szűrőket készíteni.
 
