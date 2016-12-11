@@ -37,13 +37,15 @@ target_link_libraries(sma
     )
 
 target_compile_options(sma PUBLIC ${PULSE_CFLAGS_OTHER} ${GTKMM_CFLAGS_OTHER})
-file(GLOB IMAGE_LIST doc/*.pdf)
+file(GLOB IMAGE_LIST doc/*.png)
+file(GLOB BIB doc/*.bib)
 
 add_custom_command(
     OUTPUT doc.pdf
     COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/doc/*.png ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND pandoc ARGS -S ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md -o doc.pdf 
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md ${IMAGE_LIST}
+    COMMAND cp ARGS ${CMAKE_CURRENT_SOURCE_DIR}/doc/*.bib ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND pandoc ARGS -S ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md -o doc.pdf --filter pandoc-citeproc
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/doc/doc.md ${IMAGE_LIST} ${BIB}
     )
 
 add_custom_target(doc DEPENDS doc.pdf)

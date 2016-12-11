@@ -17,6 +17,9 @@ classoption: twoside
 header-includes:
     - \usepackage{setspace}
     - \onehalfspacing
+bibliography: doc.bib
+nocite: |
+    @bib01, @bib02, @bib03, @bib04, @bib05, @bib06, @bib07, @bib08, @bib09, @bib10, @bib11, @bib12, @bib13, @bib14, @bib15, @bib16
 ---
 
 # Bevezetés
@@ -1069,3 +1072,4 @@ Jelenleg csak a kettes alapú logaritmus függvény van használatban a kód tö
 A band-pass, low-pass, illetve high-pass digitális szűrőkön felül, további biquad alapú szűrők hozzáadásával lehet erősíteni a programkönyvtárat,
 illetve lehetőség van nem biquad alapú szűrőket készíteni.
 
+# Irodalomjegyzék
