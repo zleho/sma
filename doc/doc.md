@@ -32,7 +32,7 @@ hanem pszichés folyamat is.
 
 Többen, többféleképpen értelmezik ezt a pszichoakusztikai tulajdonságát a hangnak.
 Ami a különböző mérésekben azonos, hogy egytől egyig mind a logaritmikus decibel skálát használjak.
-Ennek az oka az emberi hallásra vezethető vissza, egy az amplitúdójában kétszer erősebb jelet,
+Ennek az oka az emberi hallásra vezethető vissza, egy, az amplitúdójában kétszer erősebb jelet,
 nem hallunk kétszer hangosabban.
 Az emberi hallás átlagolja a hallott hangot 600ms és 1s között. 
 Ezt a mérések is tükrözik és általában valamilyen intervallumonként átlagolt értékkel dolgoznak.
@@ -40,15 +40,15 @@ Ezt a mérések is tükrözik és általában valamilyen intervallumonként átl
 A legegyszerűbb mérés pusztán a hang fizikai tulajdonságait veszi alapul. 
 Ez egy adott intervallumra vett jel négyzetes átlagának a gyökét jelenti (RMS, root mean square).
 
-További megoldás ha a bemeneti jelet valamilyen szűrőn áteresztve értékeljük. 
+További megoldás, ha a bemeneti jelet valamilyen szűrőn áteresztve értékeljük. 
 A szűrőt általában kísérletezéssel állapítják meg.
 Az ITU által javasolt BS-1770 az úgynevezett K-súlyozó szűrőt használja a célra.
 
 Felismerve a tényt, hogy különböző frekvencia tartományokban a változásokra különbözően reagál a fül, 
-egy lehetséges módszer a bementi jel kritikus tartományokra bontása, majd az egyes tartományok súlyozása valamilyen függvénnyel.
+egy lehetséges módszer a bemeneti jel kritikus tartományokra bontása, majd az egyes tartományok súlyozása valamilyen függvénnyel.
 Ilyen függvény például az ISO 61672:2003 által előírt A-súlyozás.
 
-Mindkét esetben a keletkezett jelből intervallumonként RMS számítunk.
+Mindkét esetben a keletkezett jelből intervallumonként RMS-t számítunk.
 
 ## A megvalósított program
 
@@ -74,7 +74,7 @@ A forráskód jól elkülöníthető részei felelősek a következő funkciók�
 
 ## A program üzembe helyezése
 
-A program telepítése bármilyen operációs rendszeren lehetséges amelyen megtalálhatók az alábbi szoftverek, programkönyvtárak 
+A program telepítése bármilyen operációs rendszeren lehetséges, amelyen megtalálhatók az alábbi szoftverek, programkönyvtárak 
 és azok függőségei:
 
 - cmake, legalább 3.5.0,
@@ -90,7 +90,7 @@ A telepítés lépései a következőek:
 # git clone https://github.com/zleho/sma.git
 ```
 
-2. Egy ideiglenes munka könyvtár létrehozása és aktívvá tétele:
+    2. Egy ideiglenes munka-könyvtár létrehozása és aktívvá tétele:
 ```
 # mkdir sma-build
 # cd sma-build
@@ -114,7 +114,7 @@ Könyvtártól függően emelt privilégiumra lehet szükség a parancs kiadás�
 
 ## A program indítása és használata
 
-A program az `sma` parancs kiadásával indítható. Miután a program elindult, az először csatlakozok a lokális
+A program az `sma` parancs kiadásával indítható. Miután a program elindult, az először csatlakozik a lokális
 PulseAudio szerverhez, majd lekérdezi a lehetséges bemeneti eszközök listáját. Ezek után a program belép a konfigurációs
 állapotba, ahol kiválaszthatjuk a bemeneti eszközt (1. Ábra), valamint megadhatjuk a mérési intervallum hosszát másodpercben,
 $0.1$ és $1$ másodperc között (2. Ábra), tizedmásodperces lépésközzel.
@@ -124,8 +124,8 @@ $0.1$ és $1$ másodperc között (2. Ábra), tizedmásodperces lépésközzel.
 ![Mérés méretének kiválasztása](meassize.png){ width=300px }
 
 Miután kiválasztottuk a nekünk megfelelő paramétereket, a konkrét mérés a `MEASURE` gombra való kattintással indítható el (3. Ábra). 
-Ezek után aktiválódnak az egyes mérések és de-aktiválódnak az egyes konfigurációs lehetőségek, amíg a mérés véget nem ér.
-A mérés befejezését a `MEASURE` gombra történő ismételte kattintás idézi elő. A mérések aktuális értékét a program számszerűen és
+Ezek után aktiválódnak az egyes mérések és inaktívvá válnak az egyes konfigurációs lehetőségek, amíg a mérés véget nem ér.
+A mérés befejezését a `MEASURE` gombra történő ismételt kattintás idézi elő. A mérések aktuális értékét a program számszerűen és
 vizuálisan is mutatja (4. Ábra).
 
 ![Mérés indítása](measbutton.png){ width=300px }
@@ -153,13 +153,13 @@ Az ITU által ajánlott algoritmus első két lépését hajtjuk végre, azaz
 1. a bemeneti jelet $K$ frekvencia súlyozó szűrőn keresztül eresztve
 2. RMS-t számolunk az intervallumon.
 
-Az első lépés két szűrő együttese. Az első a fej akusztikáját veszi figyelembe, ahol a fej formáját tömör gömbnek veszi,
+Az első lépés két szűrő együttes használata. Az első a fej akusztikáját veszi figyelembe, ahol a fej formáját tömör gömbnek veszi,
 majd egy egyszerű high-pass szűrőn keresztül ereszti a jelet. A két szűrő együtthatói az ajánlásában megtalálhatóak.
 
 ### A-weighted
 
 Az egyik leggyakrabban használt hangosság mérését elősegítő görbe az úgynevezett A-súlyozás, melyet ISO 61672:9001 és
-több nemzet szabványa is a így definiál:
+több nemzet szabványa is így definiál:
 
 $$A(f)=\frac{12200^4 \cdot f^4}{(f^2 + 20.6^2) \sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)} (f^2 + 12200^2)}$$
 
@@ -225,7 +225,7 @@ template <typename Int, std::size_t Q>
 struct Fixed;
 ```
 
-Példányosításkor, fordítási időben a következő dolgokat ellenőriződnek:
+Példányosításkor, fordítási időben a következő elemeket ellenőrizzük:
 
 - `std::is_integral_type<Int>`, illetve
 - `Q` belefér-e `Int`-be.
@@ -248,7 +248,7 @@ using Fix16ul = Fixed<unsigned long, 16>;
 Tetszőleges számból kiindulva létrehozhatunk fix-pontos számot, a konstruktor elvégzi a konverziót.
 A konstruktorok minden esetben explicitek, hogy elkerüljük a véletlen konverziókat.
 Tetszőleges másik fix-pontos számból létrehozhatunk egy újat.
-Lehetőség van a fix-pontos reprezentáció megadására is ha egész számot elváró konstruktor második paraméterével utalunk rá, 
+Lehetőség van a fix-pontos reprezentáció megadására is, ha egész számot elváró konstruktor második paraméterével utalunk rá, 
 hogy ne legyen konverzió.
 
 ```c++
@@ -266,17 +266,17 @@ auto xx = static_cast<int>(x);
 auto yy = static_cast<double>(y);
 ```
 
-A sablon-osztály támogatja az összes lebegőpontos számokra támogatott aritmetikai és logikai összehasonlító műveletet.
+A sablon-osztály támogatja az összes, lebegőpontos számokra támogatott aritmetikai és logikai összehasonlító műveletet.
 Továbbá lehetőség van fix-pontos számok $\log_2$ számítására.
 
 ### Digitális szűrők
 
-A `BiQuad` osztály-sablon egy digitális, másodrendű rekurzív lineáris szűrő megvalósítása.
+A `biquad` osztály-sablon egy digitális, másodrendű rekurzív lineáris szűrő megvalósítása.
 A sablon segítségével lehet meghatározni, hogy a példányosított osztály milyen számábrázolási módszerrel dolgozzon.
 
 ```c++
 template <typename T>
-class BiQuad;
+class biquad;
 ```
 
 Az osztály a differencia egyenletet használja:
@@ -297,7 +297,7 @@ Az $b_i$, $a_j$ konstruktor-paraméterek. Az `init()` metódussal állíthatjuk 
 
 A racionális számok egy egyszerű és hatékony megvalósítása a fixpontos számábrázolás.
 A fixpontos szám valamilyen skálázás után egész számként van ábrázolva a memóriában.
-A skálázás mértéke függ az architcechtúrától, és általában kettőnek valamely hatványa.
+A skálázás mértéke függ az architechtúrától, és általában kettőnek valamely hatványa.
 
 Legyen $Q(m,n) \doteq \{ \frac{k}{2^n} | k \in \mathbb{Z}, k \in [-2^m,2^m-1 ] \}$ az előjeles, $n+m+1$ biten ábrázolt fixpontos számok halmaza.
 Ekkor egy $q \in Q(m,n)$-nak megfelelő egész szám a memóriában a $\hat{q} = [2^nq] \in [-2^{n+m},2^{n+m-1}-1]$, ahol $[.]$ az egészrész függvény.
@@ -310,14 +310,14 @@ Ha $a,b \in Q(m,n)$, akkor
 - $\widehat{a=b} \doteq \hat{a} = \hat{b}$,
 - $\widehat{a < b} \doteq \hat{a} < \hat{b}$.
 
-A megvalósítás feladata egy olyan adattípus sablon létrehozása amire teljesülnek a fentiek,
+A megvalósítás feladata egy olyan adattípus sablon létrehozása, amire teljesülnek a fentiek,
 illetve sablon-paraméterként megadható az ábrázoláshoz használható egész típus, valamint a
-fix pont helye, azaz $n$ éréke.
+fix pont helye, azaz $n$ értéke.
 
-A osztály sablon adjon lehetőséget egyszerűen elvégezhető konverziókat más beépített számtípusokra,
+Az osztály sablon adjon lehetőséget más beépített számtípusokra egyszerűen elvégezhető konverziókra,
 valamint a többi sablon példányra.
 
-A példányosítás nem legyen lehetséges degenerált esetekre, ezek vizsgálata fordítási időben történjen.
+A példányosítás ne legyen lehetséges degenerált esetekre, ezek vizsgálata fordítási időben történjen.
 Minden konverzió legyen explicit.
 
 Szükség van még $\log_2$ számításra fixpontos számokra.
@@ -408,7 +408,7 @@ Fixed<Int, Q> log2(Fixed<Int, Q>);
 
 ### Digitális szűrők
 
-BiQuad-nak nevezzük azokat a másodrendű, lineáris, rekurzív szűrőket, melyeknek kettő zérushelye és kettő szingularitása van.
+biquad-nak nevezzük azokat a másodrendű, lineáris, rekurzív szűrőket, melyeknek kettő zérushelyük és kettő szingularitásuk van.
 Az elnevezés a bi-kvadratikus szóból ered, hiszen a $Z$ tartományban a szűrők átmenet-függvénye kettő darab másodrendű polinom hányadosa,
 azaz:
 
@@ -432,22 +432,22 @@ ahol
 $$w_n = x_n - a_1w_{n-1} - a_2w_{n-2}.$$
 
 Alapvető elvárás, hogy a megvalósítandó osztály ne függjön a számábrázolástól,
-még ha az applikáció végig ugyanazt az ábrázolást használja.
+még akkor sem, ha az applikáció végig ugyanazt az ábrázolást használja.
 A felhasználó döntése legyen az ábrázolás és a kívánt pontosság.
 Az ábrázolásnál használt számtípus az osztály sablon paramétere kell, hogy legyen.
-További elvárás a felület felé, hogy tetszőleges számú lépés után a belső állapota az osztálynak visszaállíthatő legyen
-a kezdeti állapotra, mintha az objektum éppen abban a pillanatban lett volna létrehozva.
-A függvényhívás operator segítségével imitálható, hogy az objektum tulajdonképpen egy átmenet függvényt jelképez.
+További elvárás a felület felé, hogy az osztály belső állapota tetszőleges számú lépés után visszaállítható legyen a kezdeti állapotra,
+mintha az objektum éppen abban a pillanatban lett volna létrehozva.
+A függvényhívás operátor segítségével imitálható, hogy az objektum tulajdonképpen egy átmenet függvényt jelképezzen.
 
-A fentieknek megfelelően az osztály sablon felülete a következő:
+A fentieknek megfelelően az osztály sablon felülete a következő legyen:
 
 ```c++
 template <typename Number>
-class BiQuad {
+class biquad {
 public:
     using NumberType = Number;
-    BiQuad();
-    BiQuad(
+    biquad();
+    biquad(
         Number b0, Number b1, Number b2
         Number a1, Number a2
     );
@@ -457,12 +457,12 @@ public:
 };
 ```
 
-Az K-súlyozás kettő darab BiQuad szűrő egymás utáni alkalmazásával kapjuk a mérni kívánt jelet.
-Az ITU BS-1770 ajánlás megadja a BiQuad-ok által használt konstansok értékét.
+K-súlyozás esetén kettő darab biquad szűrő egymás utáni alkalmazásával kapjuk az RMS-el mérni kívánt jelet.
+Az ITU BS-1770 ajánlás megadja a biquad-ok által használt konstansok értékét.
 
 Az A-súlyozáshoz a bemeneti jelet harmadoktávokra kell bontanunk, ehhez band-szűrőkre van szükség.
 A band-pass szűrők egy lehetséges implementációja egy low-pass és egy high-pass egymás utáni alkalmazása a bemeneti jelre.
-Low-pass és high-pass szűrők egyik lehetséges implementációja szintén lehetséges BiQuad-kal.
+Low-pass és high-pass szűrők egyik lehetséges implementációja szintén lehetséges biquad-okkal.
 
 Az $s$-tartományban egy másodrendű low-pass szűrő átmenet függvénye:
 
@@ -470,13 +470,13 @@ $$H(s) = \frac{1}{s^2 + \frac{s}{Q} + 1}.$$
 
 Ahhoz, hogy $Z$ tartományba transzformáljuk a fenti függvényt egyrészt $s$-t ki kell fejeznünk $z$ függvényeként,
 másrészt a teljes komplex teret rá kell transzformalunk a körkörös $z$ síkra.
-Ha $F_c$ a low-pass frekvencia, $F_s$ pedig a minta vételezési frekvencia, akkor az így kapott transzformáció:
+Ha $F_c$ a low-pass frekvencia, $F_s$ pedig a mintavételi frekvencia, akkor az így kapott transzformáció:
 
 $$s = \frac{1}{K}\frac{z-1}{z+1},$$
 
 ahol $K = \tan \frac{\omega T}{2}$ és $\omega T = 2 \pi \frac{F_c}{F_s}$.
 
-Ha ezt behelyettesítjük az eredeti képletbe azt kapjuk, hogy
+Ha ezt behelyettesítjük az eredeti képletbe, azt kapjuk, hogy
 
 $$H(z) = \frac{1}{(\frac{1}{K}\frac{z-1}{z+1})^2 + \frac{\frac{1}{K}\frac{z-1}{z+1}}{Q} + 1}.$$
 
@@ -484,7 +484,7 @@ További egyszerűsítés és átrendezés után kapjuk, hogy
 
 $$H(z) = \frac{K^2 + 2K^2z_{-1} + K^2z^{-2}}{(K^2 + \frac{K}{Q} + 1) + 2(K^2-1)z^{-1} + (K^2 - \frac{K}{Q} + 1)z^{-2}}.$$
 
-Ezek után a BiQuad konstansok úgy alakulnak, hogy
+Ezek után a biquad konstansok úgy alakulnak, hogy
 
 $$b_0 = K^2, b_1 = 2K^2 = 2b_0, b_2 = K^2 = b_0,$$
 
@@ -507,7 +507,7 @@ A mintavételi frekvencia sablon paraméter. A megvalósítandó osztály sablon
 
 ```c++
 template <typename Number, std::size_t Fs>
-class LowPass : public BiQuad<Number> {
+class LowPass : public biquad<Number> {
 public:
     LowPass(double Fc, double Q);
 };
@@ -537,37 +537,36 @@ public:
 
 A bemeneti jel feldolgozására több problémát is számba kell venni.
 Egyrészt olyan mintavételi frekvenciát és számábrázolást kell találnunk,
-ami támogatott a legtöbb hangkártya által. A közös pont a jelenleg,
-amit a piacon lévő hangkártyák támogatnak az a 48kHz-es mintavétel
-$Q(0,15)$ számábrázolással.
+ami a legtöbb hangkártya által támogatott. A közös pont, amit a jelenleg piacon lévő hangkártyák támogatnak, 
+az a 48kHz-es mintavétel $Q(0,15)$ számábrázolással.
 
-Másrészt olyan feldolgozási algoritmusokat kell használni amelyet a legtöbb hangkártyával
+Másrészt olyan feldolgozási algoritmusokat kell használni, amelyeket a legtöbb hangkártyával
 foglalkozó programozási felület támogat. Szinte minden esetben építhetünk arra,
 hogy a feldolgozáshoz használt programkönyvtár a hattérben bufferel számunkra,
 illetve hogy valamilyen absztrakt esemény ciklusra fűzhetjük fel az általunk
-megvalósított függvényeket amik meghívódnak a nekik megfelelő események esetén.
+megvalósított függvényeket, amik meghívódnak a nekik megfelelő események esetén.
 
 Általában a programkönyvtárat felhasználó alkalmazás feladata, hogy a ciklusmagon egyet
 iteráljon.
 
-Szükségünk van még a lehetséges bementi eszközök listájára, hogy az alkalmazás felhasználója
+Szükségünk van még a lehetséges bemeneti eszközök listájára, hogy az alkalmazás felhasználója
 eldönthesse melyik bemeneti eszközről jövő jelet szeretné az applikációval elemeztetni.
 
-Fel kell készülni arra az esetre ha nem áll elegendő mért jelmennyiség a rendelkezésünkre
-amikor az ciklus meghívja a jelfeldolgozásra biztosított függvényünket, azaz a méréseknek
-képeseknek kell lennie kezelnie ha egy mérési intervallum jelmennyisége több részletben kerül
-feldolgozásra és hogy a mérési periódus vége nem feltétlen esik egy a függvény végrehajtás
-legvégén.
+Fel kell készülni arra az esetre, hogy nem áll rendelkezésünkre elegendő mért jelmennyiség,
+amikor a ciklus meghívja a jelfeldolgozásra biztosított függvényünket, azaz a méréseknek
+képeseknek kell lenniük kezelni, hogy egy mérési intervallum jelmennyisége több részletben kerül
+feldolgozásra, illetve hogy a mérési periódus vége nem feltétlen esik egybe a függvény végrehajtásának
+legvégével.
 
-Tudni kell kezelni azokat az eseteket amikor túl sok bementi jel kerül a bufferbe
-és nem az applikáció nem képes időben feldolgozni az adott jelmennyiséget.
+Tudni kell kezelni azokat az eseteket is, amikor túl sok bemeneti jel kerül a bufferbe
+és az applikáció nem képes időben feldolgozni az adott jelmennyiséget.
 
 ### Mérések
 
 Követelmény, hogy az applikáció könnyedén kiegészíthető legyen új mérésekkel.
-Ehhez a méréseknek egységes felületet kell nyújtani a külvilág felé.
-További elvárás, hogy ennek a felületnek le adjon hozzá a futási időhöz,
-pl. ne járjon virtuális függvény hívással. Ezért a mérés sablon paramétere
+Ehhez a méréseknek egységes felületet kell nyújtaniuk a külvilág felé.
+További elvárás, hogy ennek ez a felület ne növelje a futási időt,
+pl. ne járjon virtuális függvény hívással, ezért a mérés sablonparamétere
 legyen a mérést futtató entitásnak.
 
 A számábrázolás, illetve annak pontossága,
@@ -575,7 +574,7 @@ valamint az egy periódusban mért jel mennyisége fordítási idejű,
 azaz sablonparaméter legyen.
 
 Mivel nem biztosítható, hogy egyszerre egy mérési intervallum összes adata
-rendelkezésre áll amikor a felület megfelelő metódusa meghívásra kerül, ezért
+rendelkezésre áll, amikor a felület megfelelő metódusa meghívásra kerül, ezért
 a felületnek jeleznie kell, hogy mikor ért véget egy mérési periódus.
 Ez a követelmény hatással van a mérésnél használt algoritmusokra is.
 
@@ -585,7 +584,7 @@ a minimum az összes minket érintő méréseben 0.
 Természetesen ez az érték függ a felvehető minimális értéktől,
 hiszen decibel alapú a skála.
 
-A fentiek alapján a következő felülettel kell rendelkeznie az osztályoknak:
+A fentiek alapján az osztályoknak a következő felülettel kell rendelkezniük:
 
 ```c++
 template <typename Number>
@@ -599,8 +598,8 @@ public:
 ```
 
 Itt `Measurement` nem egy konkrét osztály, hanem egy szerződés a forráskód többi része felé.
-A `step()` függvény `true`-val kell visszatérnie ha egy mérési intervallum végére érkezett,
-továbbá ebben az esetben meg kell hogy hívja `init()`-et.
+A `step()` függvénynek `true`-val kell visszatérnie, ha egy mérési intervallum végére érkezett,
+továbbá ebben az esetben meg kell hogy hívnia `init()`-et.
 
 Minden elvégzendő mérés alapja az első mérés, azaz root-mean-square számítás.
 Tulajdonképpen a többi mérés mindössze az RMS bemenetét változtatja.
@@ -642,7 +641,7 @@ $f$ a mintavételezés frekvenciája és $x_i$ az $i$-ik mért jel,
 $p_0$ pedig a legkisebb mérhető érték abszolút értéke.
 
 ITU mérés esetén az alkalmazás a bemeneti jelet $K$ súlyozó szűrőn keresztül eresztve RMS-t számol az intervallumon.
-Az K szűrő két BiQuad szűrő együttese.
+Az K szűrő két biquad szűrő együttese.
 
 Az A-súlyozást ISO 61672:9001 és több nemzet szabványa is a így definiálja:
 
@@ -656,30 +655,30 @@ $$\sum_{j=1}^K{w_j \cdot x_{ij}},$$
 
 ahol $K$ a kritikus sávok száma és $x_{ij}$ pedig a $j$-k sávba szűrt jel.
 
-Mivel a az emberi hallás 20Hz és 20kHz közé tehető, és egy oktáv emelkedés az kétszeres szorzónak felel meg a frekvenciában,
+Mivel a az emberi hallás 20Hz és 20kHz közé tehető, és egy oktáv emelkedés kétszeres szorzónak felel meg a frekvenciában,
 ezért 30 darab kritikus sávunk lesz.
 
-Az ITU által megadott BiQuad konstansok 48kHz-es mintavételhez vannak megadva, 
+Az ITU által megadott biquad konstansok 48kHz-es mintavételhez vannak megadva, 
 emiatt a többi mérésnél is azt használjuk az egyszerűség kedvéért.
-Továbbá ezt majd minden forgalomban lévő hangkártya egységesen támogatja.
+Továbbá ezt majdnem minden forgalomban lévő hangkártya egységesen támogatja.
 
 ### Felhasználói felület
 
 A felhasználói felületet négy fő részre lehet bontani. Lehetőséget kell biztosítani a felhasználónak,
-hogy kiválassz a használt bemeneti eszközt egy legördülő listából, valamint beállítsa a mérési intervallum hosszát
-egy csúszkán mely egy tizedmásodperctől egy egész másodpercig terjedhet.
+hogy kiválassza a használt bemeneti eszközt egy legördülő listából, valamint beállítsa a mérési intervallum hosszát
+egy csúszkán, mely egy tizedmásodperctől egy egész másodpercig terjedhet.
 Ezeket a konfigurációs lehetőségeket össze kell fogni. 
 
-Ezek alatt kel lennie a mérés elindítása és a futó mérés leállítására való gombnak.
+Ezek alatt kell lennie a mérés elindítására és a futó mérés leállítására való gombnak.
 A gomb megjelenítésének tükröznie kell az állapotát,azaz annak hogy éppen fut-e mérés vagy sem.
 
 Közvetlenül a gomb alatt kell szemléltetni az éppen futó mérések eredményét.
-Az eredménynek számszerűleg és vizuálisan jelezni kell a felhasználó felé egy úgynevezett progress bar segítségével.
+Az eredményeket számszerűleg és vizuálisan jeleznie kell a felhasználó felé egy úgynevezett progress bar segítségével.
 A különböző mérések egymás alatt helyezkednek el.
 
 Legalul az alkalmazás írja ki az éppen aktuális állapotát. 
 A program állapotától függően legyenek a felhasználói felület más részei aktívak vagy sem.
-Ha egy rész nem aktív az vizuálisan jelezni kell és az alkalmazásnak meg kell tiltania az interakciót a felhasználóval.
+Ha egy rész nem aktív, azt vizuálisan jelezni kell és az alkalmazásnak meg kell tiltania az interakciót a felhasználóval.
 
 ## Megvalósítás
 
@@ -694,8 +693,8 @@ Ezeket az ellenőrzéseket a felhasználótól elrejtett sablon paraméter form�
 Hasonlóan járunk el a a konstruktorok, illetve a konverziós operátorok esetén. 
 Egy `Float` típusról a `std::is_floating_point<Float>` segítségével állapítjuk meg, hogy ténylegesen lebegőpontos-e.
 
-Ahhoz, hogy egy egész számot fixpontos számmá konvertáljunk, egyszerűen meg kell hogy szorozzuk $2^Q$-val,
-ami a legtöbb architcechtúrán megvalósítható egy bit-reprezentáció balra tologatásával. 
+Ahhoz, hogy egy egész számot fixpontos számmá konvertáljunk, egyszerűen meg kell szoroznunk $2^Q$-val,
+ami a legtöbb architechtúrán megvalósítható a bit-reprezentáció balra tologatásával. 
 A visszaalakítás tulajdonképpen egy egész osztás az előző konstanssal, ami jobbra tologatással ekvivalens.
 Lebegőpontos számoknál is hasonlóan kapjunk a konverziókat, de ott már lebegőpontos osztást és szorzást végzünk.
 
@@ -712,13 +711,13 @@ A többi logikai művelet a többi meghívásával kerül megvalósításra:
 - $a > b \doteq \neg (a \le b)$,
 - $a \ge b \doteq \neg (a < b)$.
 
-Mivel $\log_b a = \frac{\log_c a}{\log_c b}$, ezért az algoritmus ami logaritmust számol elég ha egy kiválasztott $b$ értékre működik.
+Mivel $\log_b a = \frac{\log_c a}{\log_c b}$, ezért logaritmust számoló algoritmus elég ha egy kiválasztott $b$ értékre működik.
 A jelfeldolgozásban használatos decibel skála miatt a $b=10$ természetes választás lenne,
-azonban a jelenlegi számítógépes architcechtúrák hatékonyabb lehetőségeket biztosítanak $b=2$ esetén.
+azonban a jelenlegi számítógépes architechtúrák hatékonyabb lehetőségeket biztosítanak $b=2$ esetén.
 
-Ha $y = \log_2 x$, akkor természetesen $x = 2^y$. Normalizálás, azaz kettővel való osztások vagy szorzások,
-melyek természetesen bittologatások, során elérjük hogy $1 \le x < 2$, valamint megkapjuk $y$ egész részét is.
-Néhány architcechtúrán lehetőség van megszámolni a 0-k számát az első 1-ig bináris formában, ami tovább egyszerűsíti a normalizálást.
+Ha $y = \log_2 x$, akkor természetesen $x = 2^y$. Normalizálás, azaz kettővel való osztások vagy szorzások
+(melyek természetesen bittologatások) során elérjük hogy $1 \le x < 2$, valamint megkapjuk $y$ egész részét is.
+Néhány architechtúrán lehetőség van megszámolni a 0-k számát az első 1-ig bináris formában, ami tovább egyszerűsíti a normalizálást.
 
 Ha $1 \le x < 2$, akkor $0 \le y < 1$. $y$ 2-adikus tört ábrázolására áttérve kapjuk, hogy $y = \sum{y_i2^{-i}}$, amit átrendezés után
 
@@ -743,11 +742,11 @@ különben
 $$x^2 = 2 \cdot 2^{2^{-1}(y_2 + 2^{-1}(y_3 + 2^{-1}(y_4 + \dots)))}.$$
 
 2. Ha $x^2 > 2$, akkor $x_1$ mantissza bit 1 és legyen elvégezzük az első lépést $\frac{x^2}{2}$-re, különben 0 és $x^2$-re végezzük el.
-Addig ismételjük a lépéseket amíg el nem érjük a kívánt pontosságot.
+Addig ismételjük a lépéseket, amíg el nem érjük a kívánt pontosságot.
 
 ### Digitális szűrők
 
-A BiQuad-ok megvalósítására a Direct Form II képletet választjuk, mert az egyaránt jól működik fixpontot és lebegőpontos számok esetén.
+A biquad-ok megvalósítására a Direct Form II képletet választjuk, mert az egyaránt jól működik fixpontos és lebegőpontos számok esetén.
 A megvalósított képlet:
 
 $$y_n = b_0w_n + b_1w_{n-1} + b_2w_{n-2},$$
@@ -764,14 +763,14 @@ Az éppen aktuális $y_n$ kiszámítása a függvényhívás operator feladata.
 
 Az osztály állapotát a $w_{n-1}$, illetve $w_{n-2}$ aktuális érteke adja ki.
 
-A low-pass szűrőket megvalósító `LowPass` osztályt a `BiQuad` osztály sablonból kapjuk származtatás útján.
-A konstruktor feladata a BiQuad konstansok beállítása a bemeneti paraméterek:
+A low-pass szűrőket megvalósító `LowPass` osztályt a `biquad` osztály sablonból kapjuk származtatás útján.
+A konstruktor feladata a biquad konstansok beállítása a bemeneti paraméterekre:
 
 - $F_c$, az úgynevezett cut-off frekvencia, ami felett a szűrő nem enged át jelet,
 - $F_s$, a mintavétel frekvenciája, valamint
 - a használt $Q$ konstans.
 
-A low-pass BiQuad paramétereket az alábbi képletek alapján számoljuk.
+A low-pass biquad paramétereket az alábbi képletek alapján számoljuk.
 Legyen $K = \tan \frac{\omega T}{2}$ és $\omega T = 2 \pi \frac{F_c}{F_s}$, ekkor
 
 $$b_0 = \frac{K^2}{K^2 + \frac{K}{Q} + 1}, b_1 = 2b_0, b_2 = b_0,$$
@@ -789,7 +788,7 @@ valamint
 $$a_1 = 2\frac{K^2 -1}{1+\frac{K}{Q} + K^2}, a_2 = \frac{1- \frac{K}{Q} + K^2}{1+\frac{K}{Q} + K^2}.$$
 
 A band-pass szűrőket egy low-pass és egy high-pass szűrő egymás utáni alkalmazásával kapjuk.
-A konstruktor bemeneti paraméterei a sáv közép-frekvenciája, valamint a sávszélesség, valamint a választott Q konstans.
+A konstruktor bemeneti paraméterei a sáv közép-frekvenciája, a sávszélesség, valamint a választott Q konstans.
 Ha a sáv közép-frekvenciája $F_c$, a sávszélesség pedig $d$, akkor
 
 - a low-pass szűrő cut-off frekvenciája $F_c + \frac{d}{2}$, valamint
@@ -833,8 +832,8 @@ akkor a végső képlet alapján kiszámolja az RMS-t. A konstansok kiszámítá
 nem visz el futási időt a mérés elvégzése közben. Ha `step()` ad vissza új mérési értéket, akkor visszaállítja kezdeti állapotát az
 `init()` függvény meghívásával.
 
-A K súlyozás esetünkben azt jelenti, hogy a bementi jelet áteresztünk két BiQuad-on egymás után.
-Az két BiQuad paraméterei a táblázatokban találhatóak és 48kHz-es mintavételi frekvenciára vonatkoznak.
+A K súlyozás esetünkben azt jelenti, hogy a bemeneti jelet áteresztünk két biquad-on egymás után.
+Az két biquad paraméterei a táblázatokban találhatóak és 48kHz-es mintavételi frekvenciára vonatkoznak.
 
 +-------+---------------------+-------+---------------------+
 |       |                     | $b_0$ |  $1.53512485958697$ |
@@ -858,8 +857,8 @@ Az két BiQuad paraméterei a táblázatokban találhatóak és 48kHz-es mintav�
 
 Az `ITUBS1770` osztály `init()` függvényének feladata a két fázisnak megfelelő osztályok ugyanazon nevű függvényének meghívása.
 A `step()` függvény először alkalmazza a két fázist a bemeneti értékre, majd meghívja 
-az `RMSdB` egy példányának ugyanazon nevű függvényét szintén. Ha ez a hívás jelzi a mérési periódus végét,
-akkor meghívódik az `init()` függvény. Az osztály konstruktora hozza létre a két fázisnak megfelelő BiQuad-okat.
+az `RMSdB` egy példányának ugyanazon nevű függvényét. Ha ez a hívás jelzi a mérési periódus végét,
+akkor meghívódik az `init()` függvény. Az osztály konstruktora hozza létre a két fázisnak megfelelő biquad-okat.
 
 Az `AWeighted` osztály esetén a konstruktor feladata a `BandPass` objektumok létrehozása,
 valamint a nekik megfelelő
@@ -869,12 +868,12 @@ $$A(f)=\frac{12200^4 \cdot f^4}{(f^2 + 20.6^2) \sqrt{(f^2 + 107.7^2)(f^2 + 737.9
 értékek kiszámítása. Mindkettő esetén szükség van a harmadoktávok közép-frekvenciájának kiszámítására,
 melyet két egymásba ágyazott ciklus segítségével könnyedén megtehetünk. A külső ciklus végig iterál az emberi fül
 számára felfogható oktávokon, 20Hz-től kezdve duplázva a frekvenciát egészen 20480Hz-ig.
-A belső ciklusban feladata a harmadoktávokon való végigiterálás. Ehhez oktáv sávszélességét három felé osztjuk.
-A legbelső ciklusmagban kiszámítjuk a harmadoktáv közép-frekvenciáját valamint a közép-frekvenciának megfelelő súlyt.
+A belső ciklusban feladata a harmadoktávokon való végigiterálás. Ehhez az oktáv sávszélességét három egyenlő részre osztjuk.
+A legbelső ciklusmagban kiszámítjuk a harmadoktáv közép-frekvenciáját, valamint a közép-frekvenciának megfelelő súlyt.
 Továbbá a konstruktor felkészíti a tárolt `RMSdb` példányt a munkára azzal, hogy átadja neki a mérési intervallum hosszát.
 
 A `step()` függvény egy lépésében, először felbontja a jelet harmadoktávokra, azaz keresztül ereszti az összes szűrőn,
-majd az adott kritikus sávnak megfelelő súllyal összegzi azokat majd erre végrehajtja `RMSdB` egy példányának ugyanazon nevű függvényét.
+majd az adott kritikus sávnak megfelelő súllyal összegzi azokat, majd erre végrehajtja `RMSdB` egy példányának ugyanazon nevű függvényét.
 Ha ez a függvény a mérési periódus végét jelzi, akkor minden band-pass szűrőn meghívódik az `init()` függvény.
 
 ### Felhasználói felület
@@ -889,9 +888,9 @@ az elérhető bemeneti eszközök listájával aminek feltöltése az `Applicati
 - egy csúszkát (`Gtk::Scale`) tartalmazó `Gtk::Frame`, melyen a mérési intervallum hosszát állíthatja be a felhasználó.
 A csúszkán az egymás melletti értékek között 0.1s a különbség, minimum értéke 0.1, maximum pedig 1s.
 
-A `Measurement` osztály sablon a sablon paraméterként kapott mérés elvégzésért, valamint az aktuális eredmény megjelenítésért felelős.
+A `Measurement` osztály sablon a sablon paraméterként kapott mérés elvégzésért, valamint az aktuális eredmény megjelenítéséért felelős.
 Az osztály származtatás útján öröklődik `Gtk::Frame` osztályból, melynek címkéje az aktuális mérést tükrözi és konstruktor paraméter.
-A mérési eredmény grafikus megjelenítésért egy tartalmazott `Gtk::ProgressBar` példány felelős.
+A mérési eredmény grafikus megjelenítéséért egy tartalmazott `Gtk::ProgressBar` példány felelős.
 `Gtk::ProgressBar` általában valamilyen arányszámot szemléltet 0 és 1 között, de mindkét érték változtatható.
 A mi esetünkben a maximális érték a mérés maximális értéke, melyet a `max()` osztály-statikus függvény segítségével kapunk, 
 ami jelentősen függ a használt fixpontos ábrázolástól. Ha $Q=16$, akkor `max()` által visszaadott érték $20Q\lg 2$.
@@ -904,41 +903,42 @@ majd mindegyikből példányosít egy `Measurement` osztályt és ezen osztályo
 tartalmazza. Az osztály `measure()` metódusának feladata az összes tárolt mérésnek megfelelő objektum ugyanazon nevű függvényének meghívása.
 
 A `Gtk::Window`-ból származtatott `Application` osztály feladata többlétű.
-Egyrészt tartalmaz egy `PulseAudio` esemény ciklust, és futtatja azt amikor nincs más dolga (idle-time),
+Egyrészt tartalmaz egy `PulseAudio` esemény ciklust, és futtatja azt, amikor nincs más dolga (idle-time),
 másrészt feldolgozza az úgynevezett callback függvények eredményét. Jelenleg az alábbi függvényhívások eredménye érdekes számunkra:
 
 - a program indításánál csatlakozás a lokális `PulseAudio` szerverhez,
-- a bementi eszközök listájának elkérése, melyeket konfigurációs állapotban állíthatunk,
-- a mérés megkezdésekor csatlakozás a bementi eszközhöz,
-- a mérés közben a a bementi jel feldolgozása, valamint
+- a bemeneti eszközök listájának elkérése, melyeket konfigurációs állapotba állíthatunk,
+- a mérés megkezdésekor csatlakozás a bemeneti eszközhöz,
+- a mérés közben a a bemeneti jel feldolgozása, valamint
 - buffer túlcsordulás kezelése.
 
 Az osztály fogja össze a képernyőn megjelenő különböző részeket, azaz a `Config` osztály egy példányát,
-egy `Gtk::ToggleButton`-t mellyel a mérést indíthatja, illetve állíthatja le a felhasználó, a `Measurements` sablont példányosítva a mérésekkel,
+egy `Gtk::ToggleButton`-t, mellyel a mérést indíthatja, illetve állíthatja le a felhasználó, a `Measurements` sablont példányosítva a mérésekkel,
 valamint egy `Gtk::StatusBar`-t, ahol az applikáció jelenlegi állapotát tartjuk számon, illetve mérés közben jelzi a túlcsordulások számát.
 
 Az applikáció állapotától függően a felhasználói felület egyes részei inaktívak lehetnek:
 
-- kezdeti állapotban, valamint amikor a program lekéri a bementi eszközök listáját, akkor semmi sem aktív
+- kezdeti állapotban, valamint amikor a program lekéri a bemeneti eszközök listáját, akkor semmi sem aktív
 - konfigurációs állapotban aktív a konfigurációs felület és a mérést indító gomb,
-- a bementi eszközhöz csatlakozás közben semmi sem aktív,
+- a bemeneti eszközhöz csatlakozás közben semmi sem aktív,
 - mérések elvégzése közben csak a mérést leállító gomb, valamint a méréseket jelző felület aktív.
 
-Indulás után közvetlen a program kezdeti állapotban van, 
-majd miután csatlakozott `PulseAudio`-hoz lekéri a bementi eszközök listáját és átmegy az annak megfelelő állapotba.
-Ha megérkezett a bementi eszközök listája a program átmegy konfigurációs állapotba amíg a felhasználó mg nem nyomja a mérést indító gombot.
-Ekkor a program csatlakozik a bementi eszközhöz és ha ez sikeres átkerül a mérés állapotba,
-ahol addig marad amíg a felhasználó be nem fejezi a mérést a gombra kattintással. Ezek után a program visszamegy a bementi eszközök listáját elkérő állapotba.
-Az állapot átmenetekért a felhasználói felület alakításáért a `setStatus()` metódus felel.
+Indulás után közvetlenül a program kezdeti állapotban van, 
+majd miután csatlakozott `PulseAudio`-hoz, lekéri a bemeneti eszközök listáját és átmegy az annak megfelelő állapotba.
+Ha megérkezett a bemeneti eszközök listája a program átmegy konfigurációs állapotba amíg, a felhasználó meg nem nyomja a mérést indító gombot.
+Ekkor a program csatlakozik a bemeneti eszközhöz és ha ez sikeres, átkerül a mérés állapotba,
+ahol addig marad, amíg a felhasználó be nem fejezi a mérést a gombra kattintással.
+Ezek után a program visszamegy a bemeneti eszközök listáját elkérő állapotba.
+A `setStatus()` metódus felel az állapotátmenetek miatti felhasználói felület átalakításáért.
 
 ## Tesztelés
 
 A tesztelés során fontos szempont, hogy a tesztesetek futtatása és az eredmények elvégzése automatikus legyen.
 Erre azért van szükség, hogy a későbbi módosítások során ne okozzunk regressziót,
-azaz ne rontsunk el a már működő részeit az alkalmazásnak, illetve a programkönyvtárnak. 
+azaz ne rontsuk el az alkalmazásnak, illetve a programkönyvtárnak a már működő részeit. 
 
-Fontos követelmény, hogy az automatikus tesztek kellően gyorsan fussanak, hiszen a minél gyorsabb visszajelzés
-a módosításokról megkönnyíti a fejlesztés menetét. Ha az automatikus tesztek lassan futnak,
+Fontos követelmény, hogy az automatikus tesztek kellően gyorsan fussanak, hiszen 
+a módosításokról kapott gyors visszajelzés megkönnyíti a fejlesztés menetét. Ha az automatikus tesztek lassan futnak,
 akkor kevésbe frekventáltan futtatják őket fejlesztés közben a fejlesztők.
 
 Törekedni kell arra, hogy mérhető legyen a letesztelt funkciók mennyisége.
@@ -947,33 +947,33 @@ Ezt százalékos formában szokás közölni.
 
 ### Statikus kódanalízis
 
-A legkönnyebben ellenőrizhető hibák közé tartoznak azok melyeket még fordítási időben ellenőrizhetünk.
+A legkönnyebben ellenőrizhető hibák közé tartoznak azok, melyeket még fordítási időben ellenőrizhetünk.
 Ezért fordításnál a fordítóban bekapcsoljuk az összes lehetséges figyelmeztetést, és minden figyelmeztetést fordítási hibának tekintünk.
 Ha úgy véljük, hogy az adott helyen az adott figyelmeztetés nem jelent hibát, akkor és csak azon a helyen elnyomjuk a figyelmeztetés jelentését.
 
-Lehetőség szerint forráskódot további statikus analízisnek vetjük alá és ha kell akkor ehhez a használt fordítón kívül egyéb szoftvereket is felhasználunk.
+Lehetőség szerint forráskódot további statikus analízisnek vetjük alá és ha kell akkor az ehhez használt fordítón kívül egyéb szoftvereket is alkalmazunk.
 
 ### Futtatási idejű kódanalízis
 
-A tesztesetek futtatása közben, futtatási idejű analízisnek vetjük alá az alkalmazást,
-melyeket alapból nem végez el a futtatási környezet rendszerszerű használat közben. Ezek növelik a futási időt,
+A tesztesetek futtatása közben, olyan futtatási idejű analízisnek vetjük alá az alkalmazást,
+melyeket a futtatási környezet rendszerszerű használat közben nem végez el. Ezek növelik a futási időt,
 amit a valós idejű követelmények miatt nem engedhetünk meg magunknak.
 
-Ez a lépés többek között a biztonság kritikus hibák felderítésében segít. A teljesség igénye nélkül, a fázis a következő dolgokat ellenőrzi:
+Ez a lépés többek között a biztonságkritikus hibák felderítésében segít. A teljesség igénye nélkül, a fázis a következő dolgokat ellenőrzi:
 
-- felszabadítjuk-e az összes felfoglalt memóriát,
+- felszabadítjuk-e az összes lefoglalt memóriát,
 - buffer túl-, illetve alul csordulás,
 - a függvény hívási verem helyes használata.
 
 ### Fixpontos aritmetika
 
-A fixpontos számokon elvégzett aritmetikai műveletek tesztelését a lebegőpontos számok segítségével tehetjük meg.
+A fixpontos számokon elvégzett aritmetikai műveletek tesztelése a lebegőpontos számok segítségével lehetséges.
 Először a lebegőpontos számokat át alakítjuk fixpontos számokká, majd elvégezzük a műveleteket mindkét ábrázolás segítségével.
-Az eredményt vissza alakítjuk lebegőpontos számmá, majd összehasonlítjuk a lebegőpontos számokon elvégzett, ugyanazon művelet eredményével.
+Az eredményt visszaalakítjuk lebegőpontos számmá, majd összehasonlítjuk a lebegőpontos számokon elvégzett, ugyanazon művelet eredményével.
 Természetesen figyelembe kell vennünk, hogy a két reprezentáció nem ugyanolyan pontossággal dolgozik.
 
-A fentiekhez azonban először meg kell bizonyosodnunk, hogy a lebegőpontos és fixpontos ábrázolás közötti konverziók jól működnek.
-Ennek automatikus analíziséhez a következő módszert alkalmazzunk:
+A fentiekhez azonban először meg kell bizonyosodnunk arról, hogy a lebegőpontos és fixpontos ábrázolás közötti konverziók jól működnek.
+Ennek automatikus analíziséhez a következő módszert alkalmazzuk:
 
 1. Veszünk véletlenszerűen egy lebegőpontos számot a fixpontos ábrázolás tartományából.
 2. Fixpontos számmá alakítjuk.
@@ -987,14 +987,14 @@ További függvények megvalósításánál hasonlóan járunk el a jövőben.
 
 ### Digitális szűrők
 
-A biquad implementáció teszteléséhez szükségünk van egy referencia megvalósításhoz. Az nyílt forrású MATLAB klón,
+A biquad implementáció teszteléséhez szükségünk van egy referencia megvalósításhoz. A nyílt forrású MATLAB klón,
 az Octave szoftver csomag rendelkezik a szükséges tulajdonságokkal, hiszen beépített funkció a programkönyvtár által megvalósított Direct Form II.
 
 A tesztelés menete a következő:
 
 1. Véletlenszerű bemeneti jelsorozatot generálunk. Ezt a bemeneti jelet elmentjük, mint referencia input.
 2. A jelsorozat keresztül engedjük az Octave megfelelő implementációján.
-3. A kimeneti jelet elmentjük, mint referencia futás outputja.
+3. A kimeneti jelet elmentjük, mint a referencia futás outputja.
 4. Az elmentett bemeneti jelet keresztül engedjük a saját megvalósításon.
 5. A referencia és a számolt kimenetet összehasonlítjuk.
 
@@ -1002,8 +1002,8 @@ A fentieket végrehajtjuk lebegőpontos és fixpontos számábrázolás mellett 
 
 A low-pass, illetve a high-pass szűrők esetén kétféle generált jelre van szükségünk:
 
-- egy olyan amit a szűrő átereszt, azaz a cut-off frekvencia alatt, illetve felett van, valamint
-- egy olyan amit nem.
+- egy olyan, amit a szűrő átereszt, azaz a cut-off frekvencia alatt, illetve felett van, valamint
+- egy olyan, amit nem.
 
 A band-pass szűrők esetére három tartományból generálunk jelet:
 
@@ -1011,18 +1011,18 @@ A band-pass szűrők esetére három tartományból generálunk jelet:
 - a tartomány feletti jel, valamint
 - a két frekvencia határ közé eső jel.
 
-Minden esetben a generált jelent egyszerűen képezhetjük az alábbi függvénnyel. Legyen $f$ a generált jel frekvenciája $N$ az egy periódusba eső jelek száma,
+Minden esetben a generált jelet egyszerűen képezhetjük az alábbi függvénnyel. Legyen $f$ a generált jel frekvenciája $N$ az egy periódusba eső jelek száma,
 ekkor a $k$-ik generált jel:
 
 $$\sin \frac{2\pi kf}{N}.$$
 
-Az eredmény ellenőrzésénél az ellenőrizzük, hogy a kimeneti jel energiája nulla-e. Ha igen, akkor a szűrő megszűrte a generált jelet, egyébként nem.
+Az eredmény ellenőrzésénél azt vizsgáljuk, hogy a kimeneti jel energiája nulla-e? Ha igen, akkor megszűrte a generált jelet, egyébként nem.
 A jel energiáját a $\sum_{i=0}^N \frac{x_i^2}{N}$ képlettel kapjuk meg.
 
 ### Mérések
 
 A **root-mean-square** számítás tesztelésénél is olyan bemeneti értékeket kell keresnünk, melyekre meg tudjuk mondani,
-hogy milyen kimeneti értéket várunk a számítás végén. Elég egy darab mérési periódusra elvégezni a mérést és a várt értékhez hasonítani az a kapott eredményt.
+hogy milyen kimeneti értéket várunk a számítás végén. Elég egy darab mérési periódusra elvégezni a mérést, és a várt értékhez hasonítani az a kapott eredményt.
 
 A választott bemenetek és az elvárt eredmények:
 
@@ -1032,26 +1032,26 @@ A választott bemenetek és az elvárt eredmények:
 - $\sin \frac{2\pi k}{N}$, ilyenkor az elvárt érték az $\pi$ osztva a legkisebb mértékkel.
 
 A többi mérés automatikus tesztelése nem reális követelmény, mert az analízishez nem áll elegendő információ rendelkezésre,
-illetve a generátor lefejlesztése ugyanazon hiba lehetőségeket hozza magával, mint a tesztelendő implementáció.
+illetve a generátor lefejlesztése ugyanazon hiba-lehetőségeket hozza magával, mint a tesztelendő implementáció.
 
 ### Felhasználói felület és bemeneti jel feldolgozása
 
 A program többi része manuális tesztelésnek van alávetve, hiszen a felhasználói felület,
 illetve a hangkártyáról érkező jel feldolgozása nehezen automatizálható. A PulseAudio lehetőséget nyújt úgynevezett monitor eszközök használatára,
-ahol egy kimeneti eszközre küldött jelet kapjuk vissza bementi jelként. Így bementi eszköz nélkül is tesztelhetjük az alkalmazást.
+ahol egy kimeneti eszközre küldött jelet kapunk vissza bemeneti jelként. Így bemeneti eszköz nélkül is tesztelhetjük az alkalmazást.
 
 A felhasználói felület tesztelésénél a felület egyes elemeinél leellenőrizzük, hogy megfelelnek-e az eléjük támasztott követelményeknek, azaz
 
 - konfigurációs állapotban megnyomható-e a mérést elindító gomb,
-- konfigurációs állapotban inaktív-e mérés eredményét jelző része az alkalmazásnak, illetve kezdeti értéket mutat-e,
+- konfigurációs állapotban inaktív-e az alkalmazás mérés eredményét jelző része, illetve kezdeti értéket mutat-e,
 - mérés közben megnyomható-e mérést leállító gomb,
 - mérés közben inaktív-e a konfigurációs felület,
 - a program minden állapotában a megfelelő állapot üzenet tükröződik-e,
 - minden állapotban hiba nélkül kiléphetünk-e a programból,
 - program jelzi-e a felhasználó felé a fellépő hibaeseteket.
 
-Miután ezekről meggyőződtünk, a felület és a bemeneti jelhez kapcsoló forrás módosítása esetén ezeket a teszt eseteket újra ellenőrizni kell,
-hogy nem-e okozunk regressziót a működésben.
+Miután ezekről meggyőződtünk, a felület és a bemeneti jelhez kapcsoló forrás módosítása esetén ezeket a teszt-eseteket újra ellenőrizni kell,
+hogy nem okozunk regressziót a működésben.
 
 ## Továbbfejlesztési lehetőségek
 
@@ -1060,16 +1060,16 @@ Az alkalmazás lehetővé teszi, hogy könnyedén adjunk hozzá új méréseket 
 - a K súlyozáshoz hasonlóan egy digitális szűrőn keresztül eresztett bemeneti jelre RMS-t számolunk,
 - az A súlyozáshoz hasonlóan a kritikus sávokra bontott jelet súlyozott összegére számolunk RMS-t,
 - esetleg a fenti kettőt kombináljuk,
-- fentebb fel nem sorol új mérési forma.
+- fentebb fel nem sorolt új mérési formákat vezetünk be.
 
 További lehetőség, hogy az alkalmazásban beállítható legyen a mintavételi frekvencia,
 ekkor azonban a ITU BS1700 által ajánlott K frekvencia súlyozás az eredeti formájában nem használható,
 hiszen a használt biquad konstansok 48kHz-re vonatkoznak.
 
-A programkönyvtár esetében lehetőség van több matematikai függvény fixpontos megvalósítására.
-Jelenleg csak a kettes alapú logaritmus függvény van használatban a kód többi részében, ezért csak az került megvalósításra.
+A programkönyvtár esetében több matematikai függvény fixpontos megvalósítására van lehetőség.
+Jelenleg csak a kettes alapú logaritmus függvényt használjuk, ezért csak azt valósítottuk meg.
 
 A band-pass, low-pass, illetve high-pass digitális szűrőkön felül, további biquad alapú szűrők hozzáadásával lehet erősíteni a programkönyvtárat,
-illetve lehetőség van nem biquad alapú szűrőket készíteni.
+illetve nem biquad alapú szűrőket is készíthetünk.
 
 # Irodalomjegyzék
