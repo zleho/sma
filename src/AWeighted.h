@@ -6,6 +6,14 @@
 template <class Fixed>
 class AWeighted {
 public:
+    static double calcWeight(double Fc)
+    {
+        double f = Fc * Fc;
+        double a = 148840000.0 * f * f;
+        double b = (f + 424.36) * std::sqrt((f + 11599.29)*(f + 544496.41)) * (f + 148840000.0);
+        return a / b;
+    }
+
     using FixedType = Fixed;
     static constexpr double max()
     {
@@ -20,8 +28,12 @@ public:
             double high = 2 * low;
             double d = (high - low) / 3;
             double l = low;
-            for (int j = 0; l < high; l += d, ++j)
-                bands_[3*i + j] = BandPass<Fixed>(l + d / 2, d, Q);
+            for (int j = 0; l < high; l += d, ++j) {
+                double center = l + d / 2;
+                auto index = 3*i + j;
+                bands_[index] = BandPass<Fixed>(center, d, Q);
+                weights_[index] = Fixed(calcWeight(center));
+            }
         }
     }
 
@@ -40,8 +52,8 @@ public:
     bool step(Fixed x, Fixed& val)
     {
         Fixed xx = Fixed(0);
-        for (auto& band : bands_)
-            xx += band.weight() * band(x);
+        for (auto i = 0u; i < bands_.size(); ++i)
+            xx += weights_[i] * bands_[i](x);
 
         if (rms_.step(xx, val)) {
             init();
@@ -52,6 +64,7 @@ public:
     }
 private:
     std::array<BandPass<Fixed>, 30> bands_; // 3*10 third octave
+    std::array<Fixed, 30> weights_;
     RMSdB<Fixed> rms_;
 };
 

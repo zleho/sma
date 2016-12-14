@@ -47,13 +47,6 @@ public:
 
 template <class Fixed, std::size_t sampleRate = 48000>
 class BandPass {
-    static Fixed calcAWeight(double Fc)
-    {
-        double f = Fc * Fc;
-        double a = 148840000.0 * f * f;
-        double b = (f + 424.36) * std::sqrt((f + 11599.29)*(f + 544496.41)) * (f + 148840000.0);
-        return Fixed(a / b);
-    }
 public:
     BandPass()
     {
@@ -61,8 +54,7 @@ public:
 
     BandPass(double center, double bandwidth, double Q)
         : lowPass_(center + bandwidth/2, Q), 
-          highPass_(center - bandwidth/2, Q),
-          weight_(calcAWeight(center))
+          highPass_(center - bandwidth/2, Q)
     {
     }
 
@@ -76,13 +68,7 @@ public:
     {
         return lowPass_(highPass_(x));
     }
-
-    Fixed weight() const
-    {
-        return weight_;
-    }
 private:
     LowPass<Fixed, sampleRate> lowPass_;
     HighPass<Fixed, sampleRate> highPass_;
-    Fixed weight_;
 };
