@@ -33,9 +33,9 @@ public:
 
     void measure(typename MeasType::FixedType x)
     {
-        double value;
+        typename MeasType::FixedType value;
         if (meas_.step(x, value))
-            setValue(value);
+            setValue(static_cast<double>(value));
     }
 
     void setValue(double val)

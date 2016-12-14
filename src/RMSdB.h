@@ -39,18 +39,18 @@ public:
         curr_ = 0;
     }
 
-    bool step(Fixed x, double& ret)
+    bool step(Fixed x, Fixed& ret)
     {
         x *= x;
         sum_ += x;
 
         if (++curr_ == size_) {
-            ret = 0.0;
+            ret = Fixed(0);
             if (sum_.repr) {
                 sum_ = fixie::log2(sum_);
                 sum_ *= c3;
                 sum_ += c1 + c2;
-                ret = static_cast<double>(sum_);
+                ret = sum_;
             }
             init();
             return true;

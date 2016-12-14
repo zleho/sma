@@ -35,7 +35,7 @@ public:
     {
     }
 
-    bool step(Fixed x, double& val)
+    bool step(Fixed x, Fixed& val)
     {
         if (rms_.step(stage2_(stage1_(x)), val)) {
             stage1_.init();

@@ -37,7 +37,7 @@ public:
             band.init();
     }
 
-    bool step(Fixed x, double& val)
+    bool step(Fixed x, Fixed& val)
     {
         Fixed xx = Fixed(0);
         for (auto& band : bands_)
